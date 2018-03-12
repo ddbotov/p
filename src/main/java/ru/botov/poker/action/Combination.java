@@ -169,7 +169,7 @@ public enum Combination {
         this.getPowerInternal = getPowerInternal;
     }
 
-    public static BigDecimal getPower(Set<Card> cards) {
+    public static BigDecimal getPower(EnumSet<Card> cards) {
         return NONE_POWER;//TODO remove
 /*        if (cards == null) {
             return NONE_POWER;

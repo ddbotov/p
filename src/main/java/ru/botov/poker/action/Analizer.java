@@ -10,14 +10,11 @@ import java.util.stream.Collectors;
 
 public class Analizer {
 
-    private List<Set<Card>> hands;
-
     public Set<Player> whoWins(Table table) {
-        Set<Card> topHand = null;
+        EnumSet<Card> topHand = null;
         Set<Player> topPlayers = new HashSet<>();
         for (Player player : table.getPlayers()) {
-            Set<Card> currentHand = new HashSet<Card>();
-            currentHand.addAll(player.getCards());
+            EnumSet<Card> currentHand = EnumSet.copyOf(player.getCards());
             currentHand.addAll(table.getCards());
             BigDecimal currentPower = Combination.getPower(currentHand).subtract(Combination.getPower(topHand));
             if (currentPower.compareTo(new BigDecimal(0)) > 0) {
@@ -55,27 +52,27 @@ public class Analizer {
         BigDecimal chanceToWin = new BigDecimal(1);
 
         BigDecimal otherPlayersInGame = new BigDecimal(table.getPlayers().size() - 1);//if i am in game
-        Set<Card> myCards = getMyCards(table);
+        EnumSet<Card> myCards = getMyCards(table);
 
         BigDecimal chanceToLose = getChanceToLose(EnumSet.copyOf(table.getCards()), myCards, otherPlayersInGame);
         chanceToWin = chanceToWin.subtract(chanceToLose);
         return chanceToWin;
     }
 
-    private BigDecimal getChanceToLose(Set<Card> tableCards, Set<Card> myCards, BigDecimal otherPlayersInGame) {
+    private BigDecimal getChanceToLose(EnumSet<Card> tableCards, EnumSet<Card> myCards, BigDecimal otherPlayersInGame) {
         BigDecimal chanceToLose = new BigDecimal(0);
         if (tableCards.size() == 5) {
             long betterThanMeHandsCount = betterThanMeHandsCount(tableCards, myCards);
             BigDecimal chanceForHand = chanceForHand(Stage.RIVER.getRemainingSizeOfDeck());
             chanceToLose = chanceToLose.add(chanceForHand.multiply(otherPlayersInGame).multiply(new BigDecimal(betterThanMeHandsCount)));
         } else {
-            Set<Card> myAndTableCards = EnumSet.copyOf(tableCards);
+            EnumSet<Card> myAndTableCards = EnumSet.copyOf(tableCards);
             myAndTableCards.addAll(myCards);
             List<Card> remainingCards = getRemainingCards(myAndTableCards);
 
             BigDecimal oneMoreCardChance = getRemaningCardChance(remainingCards.size());
             for (Card remainingCard : remainingCards) {
-                Set<Card> potentialTableCards = EnumSet.copyOf(tableCards);
+                EnumSet<Card> potentialTableCards = EnumSet.copyOf(tableCards);
                 potentialTableCards.add(remainingCard);
                 chanceToLose.add(oneMoreCardChance.multiply(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame)));
             }
@@ -105,8 +102,8 @@ public class Analizer {
         return null;
     }
 
-    private long betterThanMeHandsCount(Set<Card> tableCards, Set<Card> myCards) {
-        Set<Card> myAndTableCards = EnumSet.copyOf(tableCards);
+    private long betterThanMeHandsCount(EnumSet<Card> tableCards, EnumSet<Card> myCards) {
+        EnumSet<Card> myAndTableCards = EnumSet.copyOf(tableCards);
         myAndTableCards.addAll(myCards);
         BigDecimal myPower = Combination.getPower(myAndTableCards);
 
@@ -116,7 +113,7 @@ public class Analizer {
             Card card1 = remainingCards.get(index1);
             for (int index2=index1+1; index2<remainingCards.size(); index2++) {
                 Card card2 = remainingCards.get(index2);
-                Set<Card> potentialHand = EnumSet.copyOf(tableCards);
+                EnumSet<Card> potentialHand = EnumSet.copyOf(tableCards);
                 potentialHand.add(card1);
                 potentialHand.add(card2);
                 BigDecimal handPower = Combination.getPower(potentialHand);
@@ -130,7 +127,7 @@ public class Analizer {
 
     private static final List<Card> ALL_CARDS = Arrays.asList(Card.values());
 
-    private List<Card> getRemainingCards(Set<Card> myAndTableCards) {
+    private List<Card> getRemainingCards(EnumSet<Card> myAndTableCards) {
         List<Card> remainingCards = new ArrayList<>(ALL_CARDS);
         remainingCards.removeAll(myAndTableCards);
         return remainingCards;
