@@ -49,12 +49,13 @@ public class Analizer {
     }
 
     public BigDecimal getChanceToWin(Table table) {
+        this.cache = new HashMap<>();
         BigDecimal chanceToWin = new BigDecimal(1);
 
         BigDecimal otherPlayersInGame = new BigDecimal(table.getPlayers().size() - 1);//if i am in game
         EnumSet<Card> myCards = getMyCards(table);
 
-        BigDecimal chanceToLose = getChanceToLose(EnumSet.copyOf(table.getCards()), myCards, otherPlayersInGame);
+        BigDecimal chanceToLose = getChanceToLose(table.getCards().isEmpty() ? EnumSet.noneOf(Card.class) : EnumSet.copyOf(table.getCards()), myCards, otherPlayersInGame);
         chanceToWin = chanceToWin.subtract(chanceToLose);
         return chanceToWin;
     }
@@ -74,7 +75,7 @@ public class Analizer {
             for (Card remainingCard : remainingCards) {
                 EnumSet<Card> potentialTableCards = EnumSet.copyOf(tableCards);
                 potentialTableCards.add(remainingCard);
-                chanceToLose.add(oneMoreCardChance.multiply(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame)));
+                chanceToLose.add(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame).multiply(oneMoreCardChance));
             }
         }
         return chanceToLose;
@@ -102,10 +103,17 @@ public class Analizer {
         return null;
     }
 
+    Map<EnumSet<Card>, Long> cache = new HashMap<>();
+
     private long betterThanMeHandsCount(EnumSet<Card> tableCards, EnumSet<Card> myCards) {
         EnumSet<Card> myAndTableCards = EnumSet.copyOf(tableCards);
         myAndTableCards.addAll(myCards);
         BigDecimal myPower = Combination.getPower(myAndTableCards);
+
+        Long valueFromCache = cache.get(myAndTableCards);
+        if (valueFromCache != null) {
+            return valueFromCache;
+        }
 
         List<Card> remainingCards = getRemainingCards(myAndTableCards);
         long betterThanMeHandsCount = 0L;
@@ -122,6 +130,7 @@ public class Analizer {
                 }
             }
         }
+        cache.put(myAndTableCards, betterThanMeHandsCount);
         return betterThanMeHandsCount;
     }
 
