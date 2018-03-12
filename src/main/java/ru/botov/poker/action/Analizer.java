@@ -52,50 +52,51 @@ public class Analizer {
     }
 
     public BigDecimal getChanceToWin(Table table) {
+        BigDecimal chanceToWin = new BigDecimal(1);
 
-        if (table.getStage() == Stage.RIVER) {
-            BigDecimal chanceToWin = new BigDecimal(1);
-            List<Set<Card>> potentialHands = betterThanMeHands(table.getCards(), getMyCards(table));
-            int cardsInDeck = table.getStage().getRemainingSizeOfDeck();
+        BigDecimal otherPlayersInGame = new BigDecimal(table.getPlayers().size() - 1);//if i am in game
+        Set<Card> myCards = getMyCards(table);
+
+        BigDecimal chanceToLose = getChanceToLose(table.getCards(), myCards, otherPlayersInGame);
+        chanceToWin = chanceToWin.subtract(chanceToLose);
+        return chanceToWin;
+    }
+
+    private BigDecimal getChanceToLose(Set<Card> tableCards, Set<Card> myCards, BigDecimal otherPlayersInGame) {
+        BigDecimal chanceToLose = new BigDecimal(0);
+        if (tableCards.size() == 5) {
+            List<Set<Card>> potentialHands = betterThanMeHands(tableCards, myCards);
             for (Set<Card> potentialHand : potentialHands) {
-                BigDecimal chanceForHand = chanceForHand(cardsInDeck);
-                cardsInDeck-=2;
-                chanceToWin = chanceToWin.subtract(
-                        chanceForHand.multiply(new BigDecimal(table.getPlayers().size() - 1)));//if i am in game
+                BigDecimal chanceForHand = chanceForHand(Stage.RIVER.getRemainingSizeOfDeck());
+                chanceToLose = chanceToLose.add(chanceForHand.multiply(otherPlayersInGame));
+            }
+        } else {
+            HashSet<Card> myAndTableCards = new HashSet<>();
+            myAndTableCards.addAll(tableCards);
+            myAndTableCards.addAll(myCards);
+            List<Card> remainingCards = getRemainingCards(myAndTableCards);
+
+            for (Card remainingCard : remainingCards) {
+                HashSet<Card> potentialTableCards = new HashSet<>(tableCards);
+                potentialTableCards.add(remainingCard);
+                chanceToLose.add(getRemaningCardChance(remainingCards.size())
+                        .multiply(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame)));
             }
         }
-        if (table.getStage() == Stage.TURN) {
-            BigDecimal chanceToWin = new BigDecimal(1);
-            HashSet<Card> myAndTableCards = new HashSet<>(7);
-            myAndTableCards.addAll(table.getCards());
-            myAndTableCards.addAll(getMyCards(table));
-            List<Set<Card>> potentialHands = getPotentialHands(myAndTableCards);
-            int cardsInDeck = table.getStage().getRemainingSizeOfDeck();
-            for (Set<Card> potentialHand : potentialHands) {
-                BigDecimal chanceForHand = chanceForHand(cardsInDeck);
-                cardsInDeck-=2;
-                chanceToWin = chanceToWin.subtract(
-                        chanceForHand.multiply(new BigDecimal(table.getPlayers().size() - 1)));//if i am in game
-            }
-
-            return chanceToWin;
-        }
-        if (table.getStage() == Stage.FLOP) {
-            return new BigDecimal(0);
-        }
-        if (table.getStage() == Stage.PREFLOP) {
-            return new BigDecimal(0);
-        }
-        return new BigDecimal(0);
+        return chanceToLose;
     }
 
     private static final RoundingMode roundingMode = RoundingMode.HALF_EVEN;
 
+    private BigDecimal getRemaningCardChance(int remainingSizeOfDeck) {
+        //TODO cache result for perfomance
+        return new BigDecimal(1)
+                .divide(new BigDecimal(remainingSizeOfDeck), roundingMode);
+    }
+
     //две карты. Одна из них будет получена из коллоды с n карт, 2-я с n-1 карт
     private BigDecimal chanceForHand(int remainingSizeOfDeck) {
-        return new BigDecimal(2)
-                .divide(new BigDecimal(remainingSizeOfDeck), roundingMode)
-                .divide(new BigDecimal(remainingSizeOfDeck-1), roundingMode);
+        return getRemaningCardChance(remainingSizeOfDeck).add(getRemaningCardChance(remainingSizeOfDeck-1));
     }
 
     private Set<Card> getMyCards(Table table) {
