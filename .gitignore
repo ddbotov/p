@@ -1,0 +1,12 @@
+.apt_generated/
+.factorypath
+bin
+
+.metadata
+target
+*.iml
+.idea
+.settings
+.classpath
+.project
+*~
