@@ -67,15 +67,37 @@ public class Analizer {
             BigDecimal chanceForHand = chanceForHand(Stage.RIVER.getRemainingSizeOfDeck());
             chanceToLose = chanceToLose.add(chanceForHand.multiply(otherPlayersInGame).multiply(new BigDecimal(betterThanMeHandsCount)));
         } else {
-            EnumSet<Card> myAndTableCards = EnumSet.copyOf(tableCards);
-            myAndTableCards.addAll(myCards);
-            List<Card> remainingCards = getRemainingCards(myAndTableCards);
+            if (tableCards.size() == 0) {//preflop
+                List<Card> remainingCards = getRemainingCards(myCards);
+                BigDecimal oneMoreCardChance = getRemaningCardChance(remainingCards.size());
+                for (Card remainingCard : remainingCards) {
+                    EnumSet<Card> potentialTableCards = EnumSet.copyOf(myCards);
+                    potentialTableCards.add(remainingCard);
+                    List<Card> remainingCards2 = getRemainingCards(potentialTableCards);
+                    BigDecimal oneMoreCardChance2 = getRemaningCardChance(remainingCards2.size()).multiply(oneMoreCardChance);
+                    for (Card remainingCard2 : remainingCards2) {
+                        EnumSet<Card> potentialTableCards2 = EnumSet.copyOf(potentialTableCards);
+                        potentialTableCards2.add(remainingCard2);
+                        List<Card> remainingCards3 = getRemainingCards(potentialTableCards2);
+                        BigDecimal oneMoreCardChance3 = getRemaningCardChance(remainingCards3.size()).multiply(oneMoreCardChance2);
+                        for (Card remainingCard3 : remainingCards3) {
+                            EnumSet<Card> potentialTableCards3 = EnumSet.copyOf(potentialTableCards2);
+                            potentialTableCards3.add(remainingCard3);
+                            chanceToLose.add(getChanceToLose(potentialTableCards3, myCards, otherPlayersInGame).multiply(oneMoreCardChance3));
+                        }
+                    }
+                }
+            } else {
+                EnumSet<Card> myAndTableCards = EnumSet.copyOf(tableCards);
+                myAndTableCards.addAll(myCards);
+                List<Card> remainingCards = getRemainingCards(myAndTableCards);
 
-            BigDecimal oneMoreCardChance = getRemaningCardChance(remainingCards.size());
-            for (Card remainingCard : remainingCards) {
-                EnumSet<Card> potentialTableCards = EnumSet.copyOf(tableCards);
-                potentialTableCards.add(remainingCard);
-                chanceToLose.add(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame).multiply(oneMoreCardChance));
+                BigDecimal oneMoreCardChance = getRemaningCardChance(remainingCards.size());
+                for (Card remainingCard : remainingCards) {
+                    EnumSet<Card> potentialTableCards = EnumSet.copyOf(tableCards);
+                    potentialTableCards.add(remainingCard);
+                    chanceToLose.add(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame).multiply(oneMoreCardChance));
+                }
             }
         }
         return chanceToLose;
