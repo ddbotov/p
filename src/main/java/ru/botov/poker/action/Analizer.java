@@ -57,7 +57,7 @@ public class Analizer {
         BigDecimal otherPlayersInGame = new BigDecimal(table.getPlayers().size() - 1);//if i am in game
         Set<Card> myCards = getMyCards(table);
 
-        BigDecimal chanceToLose = getChanceToLose(table.getCards(), myCards, otherPlayersInGame);
+        BigDecimal chanceToLose = getChanceToLose(EnumSet.copyOf(table.getCards()), myCards, otherPlayersInGame);
         chanceToWin = chanceToWin.subtract(chanceToLose);
         return chanceToWin;
     }
@@ -65,22 +65,19 @@ public class Analizer {
     private BigDecimal getChanceToLose(Set<Card> tableCards, Set<Card> myCards, BigDecimal otherPlayersInGame) {
         BigDecimal chanceToLose = new BigDecimal(0);
         if (tableCards.size() == 5) {
-            List<Set<Card>> potentialHands = betterThanMeHands(tableCards, myCards);
-            for (Set<Card> potentialHand : potentialHands) {
-                BigDecimal chanceForHand = chanceForHand(Stage.RIVER.getRemainingSizeOfDeck());
-                chanceToLose = chanceToLose.add(chanceForHand.multiply(otherPlayersInGame));
-            }
+            long betterThanMeHandsCount = betterThanMeHandsCount(tableCards, myCards);
+            BigDecimal chanceForHand = chanceForHand(Stage.RIVER.getRemainingSizeOfDeck());
+            chanceToLose = chanceToLose.add(chanceForHand.multiply(otherPlayersInGame).multiply(new BigDecimal(betterThanMeHandsCount)));
         } else {
-            HashSet<Card> myAndTableCards = new HashSet<>();
-            myAndTableCards.addAll(tableCards);
+            Set<Card> myAndTableCards = EnumSet.copyOf(tableCards);
             myAndTableCards.addAll(myCards);
             List<Card> remainingCards = getRemainingCards(myAndTableCards);
 
+            BigDecimal oneMoreCardChance = getRemaningCardChance(remainingCards.size());
             for (Card remainingCard : remainingCards) {
-                HashSet<Card> potentialTableCards = new HashSet<>(tableCards);
+                Set<Card> potentialTableCards = EnumSet.copyOf(tableCards);
                 potentialTableCards.add(remainingCard);
-                chanceToLose.add(getRemaningCardChance(remainingCards.size())
-                        .multiply(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame)));
+                chanceToLose.add(oneMoreCardChance.multiply(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame)));
             }
         }
         return chanceToLose;
@@ -99,50 +96,36 @@ public class Analizer {
         return getRemaningCardChance(remainingSizeOfDeck).add(getRemaningCardChance(remainingSizeOfDeck-1));
     }
 
-    private Set<Card> getMyCards(Table table) {
+    private EnumSet<Card> getMyCards(Table table) {
         for (Player player : table.getPlayers()) {
             if (player.isMe()) {
-                return player.getCards();
+                return EnumSet.copyOf(player.getCards());
             }
         }
         return null;
     }
 
-    private List<Set<Card>> betterThanMeHands(Set<Card> tableCards, Set<Card> myCards) {
-        HashSet<Card> myAndTableCards = new HashSet<>(7);
-        myAndTableCards.addAll(tableCards);
+    private long betterThanMeHandsCount(Set<Card> tableCards, Set<Card> myCards) {
+        Set<Card> myAndTableCards = EnumSet.copyOf(tableCards);
         myAndTableCards.addAll(myCards);
         BigDecimal myPower = Combination.getPower(myAndTableCards);
-        List<Set<Card>> potentialHands = getPotentialHands(myAndTableCards);
-        //TODO parallel
-        potentialHands = potentialHands.stream().filter(new Predicate<Set<Card>>() {
-            @Override
-            public boolean test(Set<Card> cards) {
-                Set<Card> handAndTableCards = new HashSet<>(7);
-                handAndTableCards.addAll(tableCards);
-                handAndTableCards.addAll(cards);
-                BigDecimal handPower = Combination.getPower(handAndTableCards);
-                return handPower.compareTo(myPower) > 0;
-            }
-        }).collect(Collectors.toList());
-        return potentialHands;
-    }
 
-    private List<Set<Card>> getPotentialHands(Set<Card> myAndTableCards) {
         List<Card> remainingCards = getRemainingCards(myAndTableCards);
-        List<Set<Card>> potentialHands = new LinkedList<>();
+        long betterThanMeHandsCount = 0L;
         for (int index1=0; index1<remainingCards.size()-1; index1++) {
             Card card1 = remainingCards.get(index1);
             for (int index2=index1+1; index2<remainingCards.size(); index2++) {
                 Card card2 = remainingCards.get(index2);
-                //potentialHands.add(EnumSet.of(card1, card2));
-                HashSet<Card> potentialHand = new HashSet<>(2);
+                Set<Card> potentialHand = EnumSet.copyOf(tableCards);
                 potentialHand.add(card1);
                 potentialHand.add(card2);
-                potentialHands.add(potentialHand);
+                BigDecimal handPower = Combination.getPower(potentialHand);
+                if (handPower.compareTo(myPower) > 0) {
+                    betterThanMeHandsCount++;
+                }
             }
         }
-        return potentialHands;
+        return betterThanMeHandsCount;
     }
 
     private static final List<Card> ALL_CARDS = Arrays.asList(Card.values());

@@ -86,7 +86,7 @@ public class AnalizerTest {
         Table table = new Table();
         table.setStage(Stage.FLOP);
         table.getCards().add(Card.ACE_HEART);
-        table.getCards().add(Card.ACE_SPADE);
+        //table.getCards().add(Card.ACE_SPADE);
         //table.getCards().add(Card.EIGHT_SPADE);
 
         Player me = new Player();
