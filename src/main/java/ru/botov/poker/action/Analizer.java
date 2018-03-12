@@ -71,19 +71,18 @@ public class Analizer {
                 List<Card> remainingCards = getRemainingCards(myCards);
                 BigDecimal oneMoreCardChance = getRemaningCardChance(remainingCards.size());
                 for (Card remainingCard : remainingCards) {
-                    EnumSet<Card> potentialTableCards = EnumSet.copyOf(myCards);
-                    potentialTableCards.add(remainingCard);
-                    List<Card> remainingCards2 = getRemainingCards(potentialTableCards);
+                    EnumSet<Card> potentialMyAndTableCards = EnumSet.copyOf(myCards);
+                    potentialMyAndTableCards.add(remainingCard);
+                    List<Card> remainingCards2 = getRemainingCards(potentialMyAndTableCards);
                     BigDecimal oneMoreCardChance2 = getRemaningCardChance(remainingCards2.size()).multiply(oneMoreCardChance);
                     for (Card remainingCard2 : remainingCards2) {
-                        EnumSet<Card> potentialTableCards2 = EnumSet.copyOf(potentialTableCards);
-                        potentialTableCards2.add(remainingCard2);
-                        List<Card> remainingCards3 = getRemainingCards(potentialTableCards2);
+                        EnumSet<Card> potentialMyAndTableCards2 = EnumSet.copyOf(potentialMyAndTableCards);
+                        potentialMyAndTableCards2.add(remainingCard2);
+                        List<Card> remainingCards3 = getRemainingCards(potentialMyAndTableCards2);
                         BigDecimal oneMoreCardChance3 = getRemaningCardChance(remainingCards3.size()).multiply(oneMoreCardChance2);
                         for (Card remainingCard3 : remainingCards3) {
-                            EnumSet<Card> potentialTableCards3 = EnumSet.copyOf(potentialTableCards2);
-                            potentialTableCards3.add(remainingCard3);
-                            chanceToLose.add(getChanceToLose(potentialTableCards3, myCards, otherPlayersInGame).multiply(oneMoreCardChance3));
+                            EnumSet<Card> potentialTableCards = EnumSet.of(remainingCard, remainingCard2, remainingCard3);
+                            chanceToLose.add(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame).multiply(oneMoreCardChance3));
                         }
                     }
                 }

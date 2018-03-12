@@ -10,10 +10,10 @@ import java.util.function.Function;
 
 public enum Combination {
 
-    STRAIGHT_FLUSH(new Function<Set<Card>, BigDecimal>() {
+    STRAIGHT_FLUSH(new Function<List<Card>, BigDecimal>() {
         @Override
-        public BigDecimal apply(Set<Card> cards) {
-            EnumSet<Card> suitGroup = getFlushGroup(cards);
+        public BigDecimal apply(List<Card> sortedCards) {
+            List<Card> suitGroup = getFlushGroup(sortedCards);
             if (suitGroup != null) {
                 BigDecimal straightPower = STRAIGHT.getPowerInternal.apply(suitGroup);
                 if (straightPower != NONE_POWER) {
@@ -28,10 +28,10 @@ public enum Combination {
             return NONE_POWER;
         }
     }),
-    FOUR(new Function<Set<Card>, BigDecimal>() {
+    FOUR(new Function<List<Card>, BigDecimal>() {
         @Override
-        public BigDecimal apply(Set<Card> cards) {
-            List<Card> sortedCards = getSortedDescCards(cards);
+        public BigDecimal apply(List<Card> sortedCards) {
+            sortedCards = new ArrayList<>(sortedCards);
             Power repeatedPower = getRepeatPowerAndFilterCards(4, sortedCards);
             if (repeatedPower != null) {
                 BigDecimal result = new BigDecimal(repeatedPower.ordinal());
@@ -48,10 +48,10 @@ public enum Combination {
             return NONE_POWER;
         }
     }),
-    FULL_HOUSE(new Function<Set<Card>, BigDecimal>() {
+    FULL_HOUSE(new Function<List<Card>, BigDecimal>() {
         @Override
-        public BigDecimal apply(Set<Card> cards) {
-            List<Card> sortedCards = getSortedDescCards(cards);
+        public BigDecimal apply(List<Card> sortedCards) {
+            sortedCards = new ArrayList<>(sortedCards);
             Power repeatedPower1 = getRepeatPowerAndFilterCards(3, sortedCards);
             Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCards);
             if (repeatedPower1 != null && repeatedPower2 != null) {
@@ -68,20 +68,19 @@ public enum Combination {
             return NONE_POWER;
         }
     }),
-    FLUSH(new Function<Set<Card>, BigDecimal>() {
+    FLUSH(new Function<List<Card>, BigDecimal>() {
         @Override
-        public BigDecimal apply(Set<Card> cards) {
-            EnumSet<Card> suitGroup = getFlushGroup(cards);
+        public BigDecimal apply(List<Card> sortedCards) {
+            List<Card> suitGroup = getFlushGroup(sortedCards);
             if (suitGroup != null) {
                 return getFlushPower(suitGroup);
             }
             return NONE_POWER;
         }
     }),
-    STRAIGHT(new Function<Set<Card>, BigDecimal>() {
+    STRAIGHT(new Function<List<Card>, BigDecimal>() {
         @Override
-        public BigDecimal apply(Set<Card> cards) {
-            List<Card> sortedCards = getSortedDescCards(cards);
+        public BigDecimal apply(List<Card> sortedCards) {
             Card straightTopCard = sortedCards.get(0);
             int straightLenght = 0;
             for (int index=1; index<sortedCards.size(); index++) {
@@ -103,10 +102,10 @@ public enum Combination {
             return NONE_POWER;
         }
     }),
-    THREE(new Function<Set<Card>, BigDecimal>() {
+    THREE(new Function<List<Card>, BigDecimal>() {
         @Override
-        public BigDecimal apply(Set<Card> cards) {
-            List<Card> sortedCards = getSortedDescCards(cards);
+        public BigDecimal apply(List<Card> sortedCards) {
+            sortedCards = new ArrayList<>(sortedCards);
             Power repeatedPower = getRepeatPowerAndFilterCards(3, sortedCards);
             if (repeatedPower != null) {
                 BigDecimal result = new BigDecimal(repeatedPower.ordinal());
@@ -119,10 +118,10 @@ public enum Combination {
             return NONE_POWER;
         }
     }),
-    TWO_PAIR(new Function<Set<Card>, BigDecimal>() {
+    TWO_PAIR(new Function<List<Card>, BigDecimal>() {
         @Override
-        public BigDecimal apply(Set<Card> cards) {
-            List<Card> sortedCards = getSortedDescCards(cards);
+        public BigDecimal apply(List<Card> sortedCards) {
+            sortedCards = new ArrayList<>(sortedCards);
             Power repeatedPower1 = getRepeatPowerAndFilterCards(2, sortedCards);
             Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCards);
             if (repeatedPower1 != null && repeatedPower2 != null) {
@@ -138,10 +137,10 @@ public enum Combination {
             return NONE_POWER;
         }
     }),
-    PAIR(new Function<Set<Card>, BigDecimal>() {
+    PAIR(new Function<List<Card>, BigDecimal>() {
         @Override
-        public BigDecimal apply(Set<Card> cards) {
-            List<Card> sortedCards = getSortedDescCards(cards);
+        public BigDecimal apply(List<Card> sortedCards) {
+            sortedCards = new ArrayList<>(sortedCards);
             Power pairPower = getRepeatPowerAndFilterCards(2, sortedCards);
             if (pairPower != null) {
                 BigDecimal result = new BigDecimal(pairPower.ordinal());
@@ -152,39 +151,39 @@ public enum Combination {
             return NONE_POWER;
         }
     }),
-    TOP(new Function<Set<Card>, BigDecimal>() {
+    TOP(new Function<List<Card>, BigDecimal>() {
 
         @Override
-        public BigDecimal apply(Set<Card> cards) {
-            return getTopPower(5, getSortedDescCards(cards));
+        public BigDecimal apply(List<Card> sortedCards) {
+            return getTopPower(5, sortedCards);
         }
     });
 
-    private Function<Set<Card>, BigDecimal> getPowerInternal;
+    private Function<List<Card>, BigDecimal> getPowerInternal;
     private static final BigDecimal COMBINATION_POWER_STEP = new BigDecimal(1_000_000_000_000L);
     private static final BigDecimal NONE_POWER = new BigDecimal(0);
     private static final BigDecimal TOP_POWER_STEP = new BigDecimal(100);
 
-    Combination(Function<Set<Card>, BigDecimal> getPowerInternal) {
+    Combination(Function<List<Card>, BigDecimal> getPowerInternal) {
         this.getPowerInternal = getPowerInternal;
     }
 
     public static BigDecimal getPower(EnumSet<Card> cards) {
-        //return NONE_POWER;//TODO remove
-        if (cards == null) {
+        return NONE_POWER;//TODO remove
+/*        if (cards == null) {
             return NONE_POWER;
         }
+        List<Card> sortedCards = getSortedDescCards(cards);
         for (Combination hand : values()) {
-            BigDecimal value = hand.getPowerInternal.apply(cards);
+            BigDecimal value = hand.getPowerInternal.apply(sortedCards);
             if (value.compareTo(NONE_POWER) > 0) {
                 return value;
             }
         }
-        return NONE_POWER;
+        return NONE_POWER;*/
     }
 
-    private static BigDecimal getFlushPower(Set<Card> suitGroup) {
-        List<Card> sortedSuitGroup = getSortedDescCards(suitGroup);
+    private static BigDecimal getFlushPower(List<Card> sortedSuitGroup) {
         BigDecimal result = new BigDecimal(sortedSuitGroup.get(0).getPower().ordinal());
         result = result.multiply(COMBINATION_POWER_STEP);
         result = result.multiply(COMBINATION_POWER_STEP);
@@ -194,12 +193,13 @@ public enum Combination {
         return result;
     }
 
-    private static EnumSet<Card> getFlushGroup(Set<Card> cards) {
-        Map<Suit, EnumSet<Card>> suitGroups = new HashMap<>();
+    private static List<Card> getFlushGroup(List<Card> cards) {
+        Map<Suit, List<Card>> suitGroups = new HashMap<>();
         for (Card card : cards) {
-            EnumSet<Card> suitGroup = suitGroups.get(card.getSuit());
+            List<Card> suitGroup = suitGroups.get(card.getSuit());
             if (suitGroup == null) {
-                suitGroup = EnumSet.of(card);
+                suitGroup = new ArrayList<>(5);
+                suitGroup.add(card);
                 suitGroups.put(card.getSuit(), suitGroup);
             } else {
                 suitGroup.add(card);
@@ -241,7 +241,11 @@ public enum Combination {
     }
 
     private static BigDecimal getTopPower(int topCardsCount, List<Card> sortedCards) {
-        sortedCards = sortedCards.subList(0, topCardsCount);
+        try {
+            sortedCards = sortedCards.subList(0, topCardsCount);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
         BigDecimal power = new BigDecimal(0);
         int cardPowerIndex = topCardsCount-1;
         for (Card card : sortedCards) {
