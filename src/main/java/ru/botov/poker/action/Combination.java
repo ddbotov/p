@@ -13,7 +13,7 @@ public enum Combination {
     STRAIGHT_FLUSH(new Function<Set<Card>, BigDecimal>() {
         @Override
         public BigDecimal apply(Set<Card> cards) {
-            Set<Card> suitGroup = getFlushGroup(cards);
+            EnumSet<Card> suitGroup = getFlushGroup(cards);
             if (suitGroup != null) {
                 BigDecimal straightPower = STRAIGHT.getPowerInternal.apply(suitGroup);
                 if (straightPower != NONE_POWER) {
@@ -71,7 +71,7 @@ public enum Combination {
     FLUSH(new Function<Set<Card>, BigDecimal>() {
         @Override
         public BigDecimal apply(Set<Card> cards) {
-            Set<Card> suitGroup = getFlushGroup(cards);
+            EnumSet<Card> suitGroup = getFlushGroup(cards);
             if (suitGroup != null) {
                 return getFlushPower(suitGroup);
             }
@@ -170,8 +170,8 @@ public enum Combination {
     }
 
     public static BigDecimal getPower(EnumSet<Card> cards) {
-        return NONE_POWER;//TODO remove
-/*        if (cards == null) {
+        //return NONE_POWER;//TODO remove
+        if (cards == null) {
             return NONE_POWER;
         }
         for (Combination hand : values()) {
@@ -180,7 +180,7 @@ public enum Combination {
                 return value;
             }
         }
-        return NONE_POWER;*/
+        return NONE_POWER;
     }
 
     private static BigDecimal getFlushPower(Set<Card> suitGroup) {
@@ -194,17 +194,18 @@ public enum Combination {
         return result;
     }
 
-    private static Set<Card> getFlushGroup(Set<Card> cards) {
-        Map<Suit, Set<Card>> suitGroups = new HashMap<>();
+    private static EnumSet<Card> getFlushGroup(Set<Card> cards) {
+        Map<Suit, EnumSet<Card>> suitGroups = new HashMap<>();
         for (Card card : cards) {
-            Set<Card> suitGroup = suitGroups.get(card.getSuit());
+            EnumSet<Card> suitGroup = suitGroups.get(card.getSuit());
             if (suitGroup == null) {
-                suitGroup = new HashSet<>();
+                suitGroup = EnumSet.of(card);
                 suitGroups.put(card.getSuit(), suitGroup);
-            }
-            suitGroup.add(card);
-            if (suitGroup.size() >= 5) {
-                return suitGroup;
+            } else {
+                suitGroup.add(card);
+                if (suitGroup.size() >= 5) {
+                    return suitGroup;
+                }
             }
         }
         return null;
