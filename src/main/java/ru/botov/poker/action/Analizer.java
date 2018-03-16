@@ -61,19 +61,22 @@ public class Analizer {
         return chanceToWin;
     }
 
+    private BigDecimal chanceForHandOnRiver = chanceForHand(Stage.RIVER.getRemainingSizeOfDeck());
+    private BigDecimal threeMoreCardChanceOnPreFlop = getRemaningCardChance(Stage.PREFLOP.getRemainingSizeOfDeck())
+            .multiply(getRemaningCardChance(Stage.PREFLOP.getRemainingSizeOfDeck()-1))
+            .multiply(getRemaningCardChance(Stage.PREFLOP.getRemainingSizeOfDeck()-2));
+    private BigDecimal oneMoreCardChanceOnFlop = getRemaningCardChance(Stage.FLOP.getRemainingSizeOfDeck());
+    private BigDecimal oneMoreCardChanceOnTurn = getRemaningCardChance(Stage.TURN.getRemainingSizeOfDeck());
+
     private BigDecimal getChanceToLose(EnumSet<Card> tableCards, EnumSet<Card> myCards, BigDecimal otherPlayersInGame) {
         BigDecimal chanceToLose = new BigDecimal(0);
         if (tableCards.size() == 5) {
             long betterThanMeHandsCount = betterThanMeHandsCount(tableCards, myCards);
-            BigDecimal chanceForHand = chanceForHand(Stage.RIVER.getRemainingSizeOfDeck());
-            chanceToLose = chanceToLose.add(chanceForHand.multiply(otherPlayersInGame).multiply(new BigDecimal(betterThanMeHandsCount)));
+            chanceToLose = chanceToLose.add(new BigDecimal(betterThanMeHandsCount).multiply(chanceForHandOnRiver).multiply(otherPlayersInGame));
         } else {
             if (tableCards.size() == 0) {//preflop
                 ArrayList<Card> remainingCards = new ArrayList<>(ALL_CARDS);
                 remainingCards.removeAll(myCards);
-                BigDecimal threeMoreCardChance = getRemaningCardChance(remainingCards.size())
-                        .multiply(getRemaningCardChance(remainingCards.size()-1))
-                        .multiply(getRemaningCardChance(remainingCards.size()-2));
                 for (int index1=0; index1<remainingCards.size()-1; index1++) {
                     Card card1 = remainingCards.get(index1);
                     for (int index2 = index1 + 1; index2 < remainingCards.size(); index2++) {
@@ -81,7 +84,7 @@ public class Analizer {
                         for (int index3 = index2 + 1; index3 < remainingCards.size(); index3++) {
                             Card card3 = remainingCards.get(index3);
                             EnumSet<Card> potentialTableCards = EnumSet.of(card1, card2, card3);
-                            chanceToLose.add(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame).multiply(threeMoreCardChance));
+                            chanceToLose.add(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame).multiply(threeMoreCardChanceOnPreFlop));
                         }
                     }
                 }
@@ -89,7 +92,7 @@ public class Analizer {
                 EnumSet<Card> remainingCards = EnumSet.copyOf(ALL_CARDS);
                 remainingCards.removeAll(tableCards);
                 remainingCards.removeAll(myCards);
-                BigDecimal oneMoreCardChance = getRemaningCardChance(remainingCards.size());
+                BigDecimal oneMoreCardChance = tableCards.size() == 3 ? oneMoreCardChanceOnFlop : oneMoreCardChanceOnTurn;
                 for (Card remainingCard : remainingCards) {
                     EnumSet<Card> potentialTableCards = EnumSet.copyOf(tableCards);
                     potentialTableCards.add(remainingCard);
@@ -122,7 +125,7 @@ public class Analizer {
         return null;
     }
 
-    Map<EnumSet<Card>, Long> cache = new HashMap<>();
+    private Map<EnumSet<Card>, Long> cache = new HashMap<>();
 
     private long betterThanMeHandsCount(EnumSet<Card> tableCards, EnumSet<Card> myCards) {
         EnumSet<Card> myAndTableCards = EnumSet.copyOf(tableCards);
