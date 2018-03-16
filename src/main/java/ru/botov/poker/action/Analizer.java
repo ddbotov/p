@@ -130,13 +130,13 @@ public class Analizer {
     private long betterThanMeHandsCount(EnumSet<Card> tableCards, EnumSet<Card> myCards) {
         EnumSet<Card> myAndTableCards = EnumSet.copyOf(tableCards);
         myAndTableCards.addAll(myCards);
-        BigDecimal myPower = Combination.getPower(myAndTableCards);
 
         Long valueFromCache = cache.get(myAndTableCards);
         if (valueFromCache != null) {
             return valueFromCache;
         }
 
+        BigDecimal myPower = Combination.getPower(myAndTableCards);
         ArrayList<Card> remainingCards = new ArrayList<>(ALL_CARDS);
         remainingCards.removeAll(myAndTableCards);
         long betterThanMeHandsCount = 0L;
