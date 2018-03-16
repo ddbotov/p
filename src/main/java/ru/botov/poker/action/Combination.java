@@ -53,17 +53,19 @@ public enum Combination {
         public BigDecimal apply(List<Card> sortedCards) {
             sortedCards = new ArrayList<>(sortedCards);
             Power repeatedPower1 = getRepeatPowerAndFilterCards(3, sortedCards);
-            Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCards);
-            if (repeatedPower1 != null && repeatedPower2 != null) {
-                BigDecimal result = new BigDecimal(repeatedPower1.ordinal());
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.add(new BigDecimal(repeatedPower2.ordinal()));
-                return result;
+            if (repeatedPower1 != null) {
+                Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCards);
+                if (repeatedPower2 != null) {
+                    BigDecimal result = new BigDecimal(repeatedPower1.ordinal());
+                    result = result.multiply(COMBINATION_POWER_STEP);
+                    result = result.multiply(COMBINATION_POWER_STEP);
+                    result = result.multiply(COMBINATION_POWER_STEP);
+                    result = result.multiply(COMBINATION_POWER_STEP);
+                    result = result.multiply(COMBINATION_POWER_STEP);
+                    result = result.multiply(COMBINATION_POWER_STEP);
+                    result = result.add(new BigDecimal(repeatedPower2.ordinal()));
+                    return result;
+                }
             }
             return NONE_POWER;
         }
@@ -123,16 +125,18 @@ public enum Combination {
         public BigDecimal apply(List<Card> sortedCards) {
             sortedCards = new ArrayList<>(sortedCards);
             Power repeatedPower1 = getRepeatPowerAndFilterCards(2, sortedCards);
-            Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCards);
-            if (repeatedPower1 != null && repeatedPower2 != null) {
-                BigDecimal result = new BigDecimal(repeatedPower1.ordinal());
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.multiply(COMBINATION_POWER_STEP);
-                BigDecimal repeatedPower2Result = new BigDecimal(repeatedPower2.ordinal());
-                repeatedPower2Result = repeatedPower2Result.multiply(COMBINATION_POWER_STEP);
-                result = result.add(repeatedPower2Result);
-                result = result.add(getTopPower(1, sortedCards));
-                return result;
+            if (repeatedPower1 != null) {
+                Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCards);
+                if (repeatedPower2 != null) {
+                    BigDecimal result = new BigDecimal(repeatedPower1.ordinal());
+                    result = result.multiply(COMBINATION_POWER_STEP);
+                    result = result.multiply(COMBINATION_POWER_STEP);
+                    BigDecimal repeatedPower2Result = new BigDecimal(repeatedPower2.ordinal());
+                    repeatedPower2Result = repeatedPower2Result.multiply(COMBINATION_POWER_STEP);
+                    result = result.add(repeatedPower2Result);
+                    result = result.add(getTopPower(1, sortedCards));
+                    return result;
+                }
             }
             return NONE_POWER;
         }
@@ -169,8 +173,8 @@ public enum Combination {
     }
 
     public static BigDecimal getPower(EnumSet<Card> cards) {
-        return NONE_POWER;//TODO remove
-/*        if (cards == null) {
+        //return NONE_POWER;//TODO remove
+        if (cards == null) {
             return NONE_POWER;
         }
         List<Card> sortedCards = getSortedDescCards(cards);
@@ -180,7 +184,7 @@ public enum Combination {
                 return value;
             }
         }
-        return NONE_POWER;*/
+        return NONE_POWER;
     }
 
     private static BigDecimal getFlushPower(List<Card> sortedSuitGroup) {
