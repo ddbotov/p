@@ -1,12 +1,13 @@
 package ru.botov.poker.action;
 
-import ru.botov.poker.model.*;
+import ru.botov.poker.model.Card;
+import ru.botov.poker.model.Player;
+import ru.botov.poker.model.Stage;
+import ru.botov.poker.model.Table;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 public class Analizer {
 
@@ -68,27 +69,26 @@ public class Analizer {
             chanceToLose = chanceToLose.add(chanceForHand.multiply(otherPlayersInGame).multiply(new BigDecimal(betterThanMeHandsCount)));
         } else {
             if (tableCards.size() == 0) {//preflop
-                List<Card> remainingCards = getRemainingCards(myCards);
+                ArrayList<Card> remainingCards = new ArrayList<>(ALL_CARDS);
+                remainingCards.removeAll(myCards);
                 BigDecimal threeMoreCardChance = getRemaningCardChance(remainingCards.size())
                         .multiply(getRemaningCardChance(remainingCards.size()-1))
                         .multiply(getRemaningCardChance(remainingCards.size()-2));
-                for (Card remainingCard : remainingCards) {
-                    EnumSet<Card> remainingCards2 = EnumSet.copyOf(remainingCards);
-                    remainingCards2.remove(remainingCard);
-                    for (Card remainingCard2 : remainingCards2) {
-                        EnumSet<Card> remainingCards3 = EnumSet.copyOf(remainingCards2);
-                        remainingCards3.remove(remainingCard2);
-                        for (Card remainingCard3 : remainingCards3) {
-                            EnumSet<Card> potentialTableCards = EnumSet.of(remainingCard, remainingCard2, remainingCard3);
+                for (int index1=0; index1<remainingCards.size()-1; index1++) {
+                    Card card1 = remainingCards.get(index1);
+                    for (int index2 = index1 + 1; index2 < remainingCards.size(); index2++) {
+                        Card card2 = remainingCards.get(index2);
+                        for (int index3 = index2 + 1; index3 < remainingCards.size(); index3++) {
+                            Card card3 = remainingCards.get(index3);
+                            EnumSet<Card> potentialTableCards = EnumSet.of(card1, card2, card3);
                             chanceToLose.add(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame).multiply(threeMoreCardChance));
                         }
                     }
                 }
             } else {
-                EnumSet<Card> myAndTableCards = EnumSet.copyOf(tableCards);
-                myAndTableCards.addAll(myCards);
-                List<Card> remainingCards = getRemainingCards(myAndTableCards);
-
+                EnumSet<Card> remainingCards = EnumSet.copyOf(ALL_CARDS);
+                remainingCards.removeAll(tableCards);
+                remainingCards.removeAll(myCards);
                 BigDecimal oneMoreCardChance = getRemaningCardChance(remainingCards.size());
                 for (Card remainingCard : remainingCards) {
                     EnumSet<Card> potentialTableCards = EnumSet.copyOf(tableCards);
@@ -134,7 +134,8 @@ public class Analizer {
             return valueFromCache;
         }
 
-        List<Card> remainingCards = getRemainingCards(myAndTableCards);
+        ArrayList<Card> remainingCards = new ArrayList<>(ALL_CARDS);
+        remainingCards.removeAll(myAndTableCards);
         long betterThanMeHandsCount = 0L;
         for (int index1=0; index1<remainingCards.size()-1; index1++) {
             Card card1 = remainingCards.get(index1);
@@ -153,12 +154,6 @@ public class Analizer {
         return betterThanMeHandsCount;
     }
 
-    private static final List<Card> ALL_CARDS = Arrays.asList(Card.values());
-
-    private List<Card> getRemainingCards(EnumSet<Card> myAndTableCards) {
-        List<Card> remainingCards = new ArrayList<>(ALL_CARDS);
-        remainingCards.removeAll(myAndTableCards);
-        return remainingCards;
-    }
+    private static final EnumSet<Card> ALL_CARDS = EnumSet.copyOf(Arrays.asList(Card.values()));
 
 }
