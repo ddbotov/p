@@ -1,5 +1,6 @@
 package ru.botov.poker.action;
 
+import com.google.common.collect.Ordering;
 import ru.botov.poker.model.Card;
 import ru.botov.poker.model.Power;
 import ru.botov.poker.model.Suit;
@@ -8,160 +9,7 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.function.Function;
 
-public enum Combination {
-
-    STRAIGHT_FLUSH(new Function<List<Card>, BigDecimal>() {
-        @Override
-        public BigDecimal apply(List<Card> sortedCards) {
-            List<Card> suitGroup = getFlushGroup(sortedCards);
-            if (suitGroup != null) {
-                BigDecimal straightPower = STRAIGHT.getPowerInternal.apply(suitGroup);
-                if (straightPower != NONE_POWER) {
-                    BigDecimal result = straightPower;
-                    result = result.multiply(COMBINATION_POWER_STEP);
-                    result = result.multiply(COMBINATION_POWER_STEP);
-                    result = result.multiply(COMBINATION_POWER_STEP);
-                    result = result.multiply(COMBINATION_POWER_STEP);
-                    return result;
-                }
-            }
-            return NONE_POWER;
-        }
-    }),
-    FOUR(new Function<List<Card>, BigDecimal>() {
-        @Override
-        public BigDecimal apply(List<Card> sortedCards) {
-            sortedCards = new ArrayList<>(sortedCards);
-            Power repeatedPower = getRepeatPowerAndFilterCards(4, sortedCards);
-            if (repeatedPower != null) {
-                BigDecimal result = new BigDecimal(repeatedPower.ordinal());
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.add(getTopPower(1, sortedCards));
-                return result;
-            }
-            return NONE_POWER;
-        }
-    }),
-    FULL_HOUSE(new Function<List<Card>, BigDecimal>() {
-        @Override
-        public BigDecimal apply(List<Card> sortedCards) {
-            sortedCards = new ArrayList<>(sortedCards);
-            Power repeatedPower1 = getRepeatPowerAndFilterCards(3, sortedCards);
-            if (repeatedPower1 != null) {
-                Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCards);
-                if (repeatedPower2 != null) {
-                    BigDecimal result = new BigDecimal(repeatedPower1.ordinal());
-                    result = result.multiply(COMBINATION_POWER_STEP);
-                    result = result.multiply(COMBINATION_POWER_STEP);
-                    result = result.multiply(COMBINATION_POWER_STEP);
-                    result = result.multiply(COMBINATION_POWER_STEP);
-                    result = result.multiply(COMBINATION_POWER_STEP);
-                    result = result.multiply(COMBINATION_POWER_STEP);
-                    result = result.add(new BigDecimal(repeatedPower2.ordinal()));
-                    return result;
-                }
-            }
-            return NONE_POWER;
-        }
-    }),
-    FLUSH(new Function<List<Card>, BigDecimal>() {
-        @Override
-        public BigDecimal apply(List<Card> sortedCards) {
-            List<Card> suitGroup = getFlushGroup(sortedCards);
-            if (suitGroup != null) {
-                return getFlushPower(suitGroup);
-            }
-            return NONE_POWER;
-        }
-    }),
-    STRAIGHT(new Function<List<Card>, BigDecimal>() {
-        @Override
-        public BigDecimal apply(List<Card> sortedCards) {
-            Card straightTopCard = sortedCards.get(0);
-            int straightLenght = 0;
-            for (int index=1; index<sortedCards.size(); index++) {
-                Card card = sortedCards.get(index);
-                if (straightTopCard.getPower().ordinal()-card.getPower().ordinal() == ++straightLenght) {
-                    if (straightLenght == 5) {
-                        return straightPowerFrom(straightTopCard);
-                    }
-                    if (straightTopCard.getPower() == Power.FIVE
-                            && straightLenght == 4
-                            && sortedCards.get(0).getPower() == Power.ACE) {
-                        return straightPowerFrom(straightTopCard);
-                    }
-                } else {
-                    straightTopCard = card;
-                    straightLenght=0;
-                }
-            }
-            return NONE_POWER;
-        }
-    }),
-    THREE(new Function<List<Card>, BigDecimal>() {
-        @Override
-        public BigDecimal apply(List<Card> sortedCards) {
-            sortedCards = new ArrayList<>(sortedCards);
-            Power repeatedPower = getRepeatPowerAndFilterCards(3, sortedCards);
-            if (repeatedPower != null) {
-                BigDecimal result = new BigDecimal(repeatedPower.ordinal());
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.add(getTopPower(2, sortedCards));
-                return result;
-            }
-            return NONE_POWER;
-        }
-    }),
-    TWO_PAIR(new Function<List<Card>, BigDecimal>() {
-        @Override
-        public BigDecimal apply(List<Card> sortedCards) {
-            sortedCards = new ArrayList<>(sortedCards);
-            Power repeatedPower1 = getRepeatPowerAndFilterCards(2, sortedCards);
-            if (repeatedPower1 != null) {
-                Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCards);
-                if (repeatedPower2 != null) {
-                    BigDecimal result = new BigDecimal(repeatedPower1.ordinal());
-                    result = result.multiply(COMBINATION_POWER_STEP);
-                    result = result.multiply(COMBINATION_POWER_STEP);
-                    BigDecimal repeatedPower2Result = new BigDecimal(repeatedPower2.ordinal());
-                    repeatedPower2Result = repeatedPower2Result.multiply(COMBINATION_POWER_STEP);
-                    result = result.add(repeatedPower2Result);
-                    result = result.add(getTopPower(1, sortedCards));
-                    return result;
-                }
-            }
-            return NONE_POWER;
-        }
-    }),
-    PAIR(new Function<List<Card>, BigDecimal>() {
-        @Override
-        public BigDecimal apply(List<Card> sortedCards) {
-            sortedCards = new ArrayList<>(sortedCards);
-            Power pairPower = getRepeatPowerAndFilterCards(2, sortedCards);
-            if (pairPower != null) {
-                BigDecimal result = new BigDecimal(pairPower.ordinal());
-                result = result.multiply(COMBINATION_POWER_STEP);
-                result = result.add(getTopPower(3, sortedCards));
-                return result;
-            }
-            return NONE_POWER;
-        }
-    }),
-    TOP(new Function<List<Card>, BigDecimal>() {
-
-        @Override
-        public BigDecimal apply(List<Card> sortedCards) {
-            return getTopPower(5, sortedCards);
-        }
-    });
+public class Combination {
 
     private Function<List<Card>, BigDecimal> getPowerInternal;
     private static final BigDecimal COMBINATION_POWER_STEP = new BigDecimal(1_000_000_000_000L);
@@ -178,22 +26,150 @@ public enum Combination {
             return NONE_POWER;
         }
         List<Card> sortedCards = getSortedDescCards(cards);
-        for (Combination hand : values()) {
-            BigDecimal value = hand.getPowerInternal.apply(sortedCards);
-            if (value.compareTo(NONE_POWER) > 0) {
-                return value;
+
+        List<Card> suitGroup = getFlushGroup(sortedCards);
+        if (suitGroup != null) {
+            BigDecimal straightPower = getStraightPower(suitGroup);
+            if (straightPower != NONE_POWER) {//STRAIGHT_FLUSH
+                return getStraightFlushPower(straightPower);
+            } else {
+                ArrayList<Card> sortedCardsCopy = new ArrayList<>(sortedCards);
+                Power repeatedPower = getRepeatPowerAndFilterCards(4, sortedCardsCopy);
+                if (repeatedPower != null) {//FOUR
+                    return getFourPower(repeatedPower, sortedCardsCopy);
+                } else {
+                    ArrayList<Card> sortedCardsCopy2 = new ArrayList<>(sortedCards);
+                    Power repeatedPower3 = getRepeatPowerAndFilterCards(3, sortedCardsCopy2);
+                    if (repeatedPower3 != null) {
+                        Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCardsCopy2);
+                        if (repeatedPower2 != null) {//FULL_HOUSE
+                            return getFullHousePower(repeatedPower3, repeatedPower2);
+                        }
+                    }
+                }
+            }
+            return getFlushPower(suitGroup);//FLUSH
+        }
+        BigDecimal straightPower = getStraightPower(sortedCards);
+        if (straightPower != NONE_POWER) {//STRAIGHT
+            return straightPower;
+        }
+        ArrayList<Card> sortedCardsCopy = new ArrayList<>(sortedCards);
+        Power repeatedPower3 = getRepeatPowerAndFilterCards(3, sortedCardsCopy);
+        if (repeatedPower3 != null) {//THREE
+            return getThreePower(repeatedPower3, sortedCardsCopy);
+        } else {
+            Power repeatedPower1 = getRepeatPowerAndFilterCards(2, sortedCardsCopy);
+            if (repeatedPower1 != null) {
+                Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCardsCopy);
+                if (repeatedPower2 != null) {//TWO_PAIRS
+                    return getTwoPairPower(repeatedPower1, repeatedPower2, sortedCardsCopy);
+                } else {//TWO
+                    BigDecimal result = new BigDecimal(repeatedPower1.ordinal());
+                    result = result.multiply(COMBINATION_POWER_STEP);
+                    result = result.add(getTopPower(3, sortedCardsCopy));
+                    return result;
+                }
+            }
+        }
+        return getTopPower(5, sortedCards);//TOP
+    }
+
+    private static BigDecimal twoPairPowerMultiplyer = new BigDecimal(1)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP);
+
+    private static BigDecimal getTwoPairPower(Power repeatedPower1, Power repeatedPower2, ArrayList<Card> sortedCardsCopy) {
+        BigDecimal result = new BigDecimal(repeatedPower1.ordinal());
+        result = result.multiply(twoPairPowerMultiplyer);
+        BigDecimal repeatedPower2Result = new BigDecimal(repeatedPower2.ordinal());
+        repeatedPower2Result = repeatedPower2Result.multiply(COMBINATION_POWER_STEP);
+        result = result.add(repeatedPower2Result);
+        result = result.add(getTopPower(1, sortedCardsCopy));
+        return result;
+    }
+
+    private static BigDecimal threePowerMultiplyer = new BigDecimal(1)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP);
+
+    private static BigDecimal getThreePower(Power repeatedPower3, ArrayList<Card> sortedCards) {
+        BigDecimal result = new BigDecimal(repeatedPower3.ordinal());
+        result = result.multiply(threePowerMultiplyer);
+        result = result.add(getTopPower(2, sortedCards));
+        return result;
+    }
+
+    private static BigDecimal getStraightPower(List<Card> sortedCards) {
+        Card straightTopCard = sortedCards.get(0);
+        int straightLenght = 0;
+        for (int index=1; index<sortedCards.size(); index++) {
+            Card card = sortedCards.get(index);
+            if (straightTopCard.getPower().ordinal()-card.getPower().ordinal() == ++straightLenght) {
+                if (straightLenght == 5) {
+                    return straightPowerFrom(straightTopCard);
+                }
+                if (straightTopCard.getPower() == Power.FIVE
+                        && straightLenght == 4
+                        && sortedCards.get(0).getPower() == Power.ACE) {
+                    return straightPowerFrom(straightTopCard);
+                }
+            } else {
+                straightTopCard = card;
+                straightLenght=0;
             }
         }
         return NONE_POWER;
     }
 
+    private static BigDecimal fullHousePowerMultiplyer = new BigDecimal(1)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP);
+
+    private static BigDecimal getFullHousePower(Power repeatedPower3, Power repeatedPower2) {
+        BigDecimal result = new BigDecimal(repeatedPower3.ordinal());
+        result = result.multiply(fullHousePowerMultiplyer);
+        result = result.add(new BigDecimal(repeatedPower2.ordinal()));
+        return result;
+    }
+
+    private static BigDecimal fourPowerMultiplyer = new BigDecimal(1)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP);
+
+    private static BigDecimal getFourPower(Power repeatedPower, ArrayList<Card> sortedCardsCopy) {
+        BigDecimal result = new BigDecimal(repeatedPower.ordinal());
+        result = result.multiply(fourPowerMultiplyer);
+        result = result.add(getTopPower(1, sortedCardsCopy));
+        return result;
+    }
+
+    private static BigDecimal getStraightFlushPower(BigDecimal straightPower) {
+        BigDecimal result = straightPower;
+        result = result.multiply(straightPowerMultiplyer);
+        return result;
+    }
+
+    private static BigDecimal flushPowerMultiplyer = new BigDecimal(1)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP);
+
     private static BigDecimal getFlushPower(List<Card> sortedSuitGroup) {
         BigDecimal result = new BigDecimal(sortedSuitGroup.get(0).getPower().ordinal());
-        result = result.multiply(COMBINATION_POWER_STEP);
-        result = result.multiply(COMBINATION_POWER_STEP);
-        result = result.multiply(COMBINATION_POWER_STEP);
-        result = result.multiply(COMBINATION_POWER_STEP);
-        result = result.multiply(COMBINATION_POWER_STEP);
+        result = result.multiply(flushPowerMultiplyer);
         return result;
     }
 
@@ -215,29 +191,31 @@ public enum Combination {
         return null;
     }
 
+    private static BigDecimal straightPowerMultiplyer = new BigDecimal(1)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP)
+            .multiply(COMBINATION_POWER_STEP);
+
     private static BigDecimal straightPowerFrom(Card straightTopCard) {
         BigDecimal result = new BigDecimal(straightTopCard.getPower().ordinal());
-        result = result.multiply(COMBINATION_POWER_STEP);
-        result = result.multiply(COMBINATION_POWER_STEP);
-        result = result.multiply(COMBINATION_POWER_STEP);
-        result = result.multiply(COMBINATION_POWER_STEP);
+        result = result.multiply(straightPowerMultiplyer);
         return result;
     }
 
     private static Power getRepeatPowerAndFilterCards(int repeatCardCount, List<Card> sortedCards) {
         Card lastCard = sortedCards.get(0);
-        Set<Card> cardsToFilter = new HashSet<>();
-        cardsToFilter.add(lastCard);
+        EnumSet<Card> cardsToFilter = EnumSet.of(lastCard);
         for (int index=1; index<sortedCards.size(); index++) {
             Card card = sortedCards.get(index);
-            cardsToFilter.add(card);
             if (lastCard.getPower().ordinal() == card.getPower().ordinal()) {
+                cardsToFilter.add(card);
                 if (cardsToFilter.size() == repeatCardCount) {
                     sortedCards.removeAll(cardsToFilter);
                     return lastCard.getPower();
                 }
             } else {
-                cardsToFilter = new HashSet<>();
+                cardsToFilter = EnumSet.of(card);
                 lastCard = card;
             }
         }
@@ -245,11 +223,17 @@ public enum Combination {
     }
 
     private static BigDecimal getTopPower(int topCardsCount, List<Card> sortedCards) {
-        try {
-            sortedCards = sortedCards.subList(0, topCardsCount);
-        } catch (Throwable e) {
-            e.printStackTrace();
+        BigDecimal power = new BigDecimal(0);
+        for (int index=0; index < topCardsCount; index++) {
+            Card card = sortedCards.get(index);
+            BigDecimal cardValue = new BigDecimal(card.getPower().ordinal());
+            for (int index2=0; index2<topCardsCount-index-1; index2++) {
+                cardValue = cardValue.multiply(TOP_POWER_STEP);
+            }
+            power = power.add(cardValue);
         }
+        return power;
+/*        sortedCards = sortedCards.subList(0, topCardsCount);
         BigDecimal power = new BigDecimal(0);
         int cardPowerIndex = topCardsCount-1;
         for (Card card : sortedCards) {
@@ -260,7 +244,7 @@ public enum Combination {
             power = power.add(cardValue);
             cardPowerIndex--;
         }
-        return power;
+        return power;*/
     }
 
     private static Comparator<? super Card> sortedDescComparator = new Comparator<Card>() {
@@ -270,10 +254,25 @@ public enum Combination {
         }
     };
 
+    private static Ordering ordering = Ordering.from(sortedDescComparator);
+
     //Возвращает отсортированнй по убыванию список
-    private static ArrayList<Card> getSortedDescCards(Set<Card> cards) {
+    private static List<Card> getSortedDescCards(Set<Card> cards) {
+/*        LinkedList<Card> sortedCards = new LinkedList<Card>();
+        for (Card card : cards) {
+            int index = 0;
+            for (Card sortedCard : sortedCards) {
+                if (sortedCard.getPower().ordinal() > card.getPower().ordinal()) {
+                    index++;
+                    break;
+                }
+            }
+            sortedCards.add(index, card);
+        }*/
         ArrayList<Card> sortedCards = new ArrayList<Card>(cards);
         Collections.sort(sortedCards, sortedDescComparator);
+
+        //List<Card> sortedCards = ordering.sortedCopy(cards);
         return sortedCards;
     }
 
