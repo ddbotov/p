@@ -30,7 +30,6 @@ public class Combination {
             if (straightPower != NONE_POWER) {//STRAIGHT_FLUSH
                 return getStraightFlushPower(straightPower);
             }
-            return getFlushPower(suitGroup);//FLUSH
         }
 
         ArrayList<Card> sortedCardsCopy = new ArrayList<>(sortedCards);
