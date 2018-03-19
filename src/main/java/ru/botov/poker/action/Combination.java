@@ -217,7 +217,7 @@ public class Combination {
         EnumSet<Card> cardsToFilter = null;
         for (int index=1; index<sortedCards.size(); index++) {
             Card card = sortedCards.get(index);
-            if (lastCard.getPower().ordinal() == card.getPower().ordinal()) {
+            if (lastCard.getPower() == card.getPower()) {
                 if (cardsToFilter == null) {
                     cardsToFilter = EnumSet.of(card);
                 }
