@@ -174,7 +174,31 @@ public class Combination {
     }
 
     private static List<Card> getFlushGroup(List<Card> cards) {
-        Map<Suit, List<Card>> suitGroups = new HashMap<>();
+        List<Card> heartGroup = null, diamondGroup = null, clubGroup = null, spadeGroup = null;
+        for (Card card : cards) {
+            Suit suit = card.getSuit();
+            List<Card> suitGroup = null;
+            if (suit == Suit.HEART) {
+                suitGroup = heartGroup;
+            } else if (suit == Suit.DIAMOND) {
+                suitGroup = diamondGroup;
+            } else if (suit == Suit.CLUB) {
+                suitGroup = clubGroup;
+            } else if (suit == Suit.SPADE) {
+                suitGroup = spadeGroup;
+            }
+            if (suitGroup == null) {
+                suitGroup = new ArrayList<>(5);
+                suitGroup.add(card);
+            } else {
+                suitGroup.add(card);
+                if (suitGroup.size() >= 5) {
+                    return suitGroup;
+                }
+            }
+        }
+
+/*        Map<Suit, List<Card>> suitGroups = new HashMap<>(4);
         for (Card card : cards) {
             List<Card> suitGroup = suitGroups.get(card.getSuit());
             if (suitGroup == null) {
@@ -187,7 +211,7 @@ public class Combination {
                     return suitGroup;
                 }
             }
-        }
+        }*/
         return null;
     }
 
