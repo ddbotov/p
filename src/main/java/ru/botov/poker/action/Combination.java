@@ -5,10 +5,7 @@ import ru.botov.poker.model.Power;
 import ru.botov.poker.model.Suit;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumSet;
-import java.util.List;
+import java.util.*;
 import java.util.function.Function;
 
 public class Combination {
@@ -213,20 +210,19 @@ public class Combination {
 
     private static Power getRepeatPowerAndFilterCards(int repeatCardCount, List<Card> sortedCards) {
         Card lastCard = sortedCards.get(0);
-        EnumSet<Card> cardsToFilter = null;
+        int count = 1;
         for (int index=1; index<sortedCards.size(); index++) {
             Card card = sortedCards.get(index);
             if (lastCard.getPower() == card.getPower()) {
-                if (cardsToFilter == null) {
-                    cardsToFilter = EnumSet.of(card);
-                }
-                cardsToFilter.add(card);
-                if (cardsToFilter.size() == repeatCardCount) {
-                    sortedCards.removeAll(cardsToFilter);
+                count++;
+                if (count == repeatCardCount) {
+                    for (int indexToRemove = index; indexToRemove>index-repeatCardCount; indexToRemove--) {
+                        sortedCards.remove(indexToRemove);
+                    }
                     return lastCard.getPower();
                 }
             } else {
-                cardsToFilter = null;
+                count = 1;
                 lastCard = card;
             }
         }
