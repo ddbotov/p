@@ -84,7 +84,7 @@ public class Analizer {
                         for (int index3 = index2 + 1; index3 < remainingCards.size(); index3++) {
                             Card card3 = remainingCards.get(index3);
                             EnumSet<Card> potentialTableCards = EnumSet.of(card1, card2, card3);
-                            chanceToLose.add(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame).multiply(threeMoreCardChanceOnPreFlop));
+                            chanceToLose = chanceToLose.add(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame).multiply(threeMoreCardChanceOnPreFlop));
                         }
                     }
                 }
@@ -96,7 +96,7 @@ public class Analizer {
                 for (Card remainingCard : remainingCards) {
                     EnumSet<Card> potentialTableCards = EnumSet.copyOf(tableCards);
                     potentialTableCards.add(remainingCard);
-                    chanceToLose.add(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame).multiply(oneMoreCardChance));
+                    chanceToLose = chanceToLose.add(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame).multiply(oneMoreCardChance));
                 }
             }
         }
@@ -107,13 +107,13 @@ public class Analizer {
 
     private BigDecimal getRemaningCardChance(int remainingSizeOfDeck) {
         //TODO cache result for perfomance
-        return new BigDecimal(1)
+        return new BigDecimal("1.00000000000000000000000")
                 .divide(new BigDecimal(remainingSizeOfDeck), roundingMode);
     }
 
     //две карты. Одна из них будет получена из коллоды с n карт, 2-я с n-1 карт
     private BigDecimal chanceForHand(int remainingSizeOfDeck) {
-        return getRemaningCardChance(remainingSizeOfDeck).add(getRemaningCardChance(remainingSizeOfDeck-1));
+        return getRemaningCardChance(remainingSizeOfDeck).multiply(getRemaningCardChance(remainingSizeOfDeck-1));
     }
 
     private EnumSet<Card> getMyCards(Table table) {

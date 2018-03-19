@@ -63,8 +63,11 @@ public class AnalizerTest {
         Analizer analizer = new Analizer();
         Table table = new Table();
         table.setStage(Stage.FLOP);
-        table.getCards().add(Card.ACE_HEART);
+/*        table.getCards().add(Card.ACE_HEART);
         table.getCards().add(Card.ACE_SPADE);
+        table.getCards().add(Card.EIGHT_SPADE);*/
+        table.getCards().add(Card.KING_CLUB);
+        table.getCards().add(Card.KING_SPADE);
         table.getCards().add(Card.EIGHT_SPADE);
 
         Player me = new Player();
