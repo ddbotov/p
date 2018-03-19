@@ -200,21 +200,6 @@ public class Combination {
                 }
             }
         }
-
-/*        Map<Suit, List<Card>> suitGroups = new HashMap<>(4);
-        for (Card card : cards) {
-            List<Card> suitGroup = suitGroups.get(card.getSuit());
-            if (suitGroup == null) {
-                suitGroup = new ArrayList<>(5);
-                suitGroup.add(card);
-                suitGroups.put(card.getSuit(), suitGroup);
-            } else {
-                suitGroup.add(card);
-                if (suitGroup.size() >= 5) {
-                    return suitGroup;
-                }
-            }
-        }*/
         return null;
     }
 
@@ -250,48 +235,6 @@ public class Combination {
             }
         }
         return null;
-
-
-/*        Iterator<Card> it = sortedCards.iterator();
-        Card lastCard = it.next();
-        //EnumSet<Card> cardsToFilter = EnumSet.of(lastCard);
-        int count = 0;
-        Power result = null;
-        while (it.hasNext()) {
-            Card card = it.next();
-            if (lastCard.getPower().ordinal() == card.getPower().ordinal()) {
-                //cardsToFilter.add(card);
-                count++;
-                if (count == repeatCardCount) {
-                    result = lastCard.getPower();
-                    break;
-                }
-            } else {
-                //cardsToFilter = EnumSet.of(card);
-                count = 0;
-                lastCard = card;
-            }
-        }
-
-        //sortedCards.removeAll(cardsToFilter);
-        return result;*/
-
-/*        Card lastCard = sortedCards.get(0);
-        EnumSet<Card> cardsToFilter = EnumSet.of(lastCard);
-        for (int index=1; index<sortedCards.size(); index++) {
-            Card card = sortedCards.get(index);
-            if (lastCard.getPower().ordinal() == card.getPower().ordinal()) {
-                cardsToFilter.add(card);
-                if (cardsToFilter.size() == repeatCardCount) {
-                    sortedCards.removeAll(cardsToFilter);
-                    return lastCard.getPower();
-                }
-            } else {
-                cardsToFilter = EnumSet.of(card);
-                lastCard = card;
-            }
-        }
-        return null;*/
     }
 
     private static BigDecimal getTopPower(int topCardsCount, List<Card> sortedCards) {
@@ -305,47 +248,48 @@ public class Combination {
             power = power.add(cardValue);
         }
         return power;
-/*        sortedCards = sortedCards.subList(0, topCardsCount);
-        BigDecimal power = new BigDecimal(0);
-        int cardPowerIndex = topCardsCount-1;
-        for (Card card : sortedCards) {
-            BigDecimal cardValue = new BigDecimal(card.getPower().ordinal());
-            for (int index=0; index<cardPowerIndex; index++) {
-                cardValue = cardValue.multiply(TOP_POWER_STEP);
-            }
-            power = power.add(cardValue);
-            cardPowerIndex--;
-        }
-        return power;*/
     }
 
-    private static Comparator<? super Card> sortedDescComparator = new Comparator<Card>() {
+/*    private static Comparator<? super Card> sortedDescComparator = new Comparator<Card>() {
         @Override
         public int compare(Card o1, Card o2) {
             return o2.getPower().ordinal() - o1.getPower().ordinal();
+        }
+    };*/
+
+    private static Comparator<Object> sortedDescComparator = new Comparator<Object>() {
+        @Override
+        public int compare(Object o1, Object o2) {
+            return ((Card) o2).getPower().ordinal() - ((Card) o1).getPower().ordinal();
         }
     };
 
     private static Ordering ordering = Ordering.from(sortedDescComparator);
 
     //Возвращает отсортированнй по убыванию список
-    private static List<Card> getSortedDescCards(Set<Card> cards) {
-/*        LinkedList<Card> sortedCards = new LinkedList<Card>();
-        for (Card card : cards) {
-            int index = 0;
-            for (Card sortedCard : sortedCards) {
-                if (sortedCard.getPower().ordinal() > card.getPower().ordinal()) {
-                    index++;
-                    break;
-                }
-            }
-            sortedCards.add(index, card);
-        }*/
-        ArrayList<Card> sortedCards = new ArrayList<Card>(cards);
-        Collections.sort(sortedCards, sortedDescComparator);
+    private static List<Card> getSortedDescCards(EnumSet<Card> cards) {
+        Object[] elementData = cards.toArray();
+        bubbleSort(elementData);
+        List<Object> sortedCards = Arrays.asList(elementData);
+        return (List<Card>) (List) sortedCards;
+    }
 
-        //List<Card> sortedCards = ordering.sortedCopy(cards);
-        return sortedCards;
+    public static void bubbleSort(Object[] numArray) {
+
+        int n = numArray.length;
+        Object temp = 0;
+
+        for (int i = 0; i < n; i++) {
+            for (int j = 1; j < (n - i); j++) {
+
+                if (((Card) numArray[j - 1]).getPower().ordinal() > ( (Card) numArray[j]).getPower().ordinal()) {
+                    temp = numArray[j - 1];
+                    numArray[j - 1] = numArray[j];
+                    numArray[j] = temp;
+                }
+
+            }
+        }
     }
 
 }
