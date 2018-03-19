@@ -32,30 +32,33 @@ public class Combination {
             BigDecimal straightPower = getStraightPower(suitGroup);
             if (straightPower != NONE_POWER) {//STRAIGHT_FLUSH
                 return getStraightFlushPower(straightPower);
-            } else {
-                ArrayList<Card> sortedCardsCopy = new ArrayList<>(sortedCards);
-                Power repeatedPower = getRepeatPowerAndFilterCards(4, sortedCardsCopy);
-                if (repeatedPower != null) {//FOUR
-                    return getFourPower(repeatedPower, sortedCardsCopy);
-                } else {
-                    ArrayList<Card> sortedCardsCopy2 = new ArrayList<>(sortedCards);
-                    Power repeatedPower3 = getRepeatPowerAndFilterCards(3, sortedCardsCopy2);
-                    if (repeatedPower3 != null) {
-                        Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCardsCopy2);
-                        if (repeatedPower2 != null) {//FULL_HOUSE
-                            return getFullHousePower(repeatedPower3, repeatedPower2);
-                        }
-                    }
-                }
             }
             return getFlushPower(suitGroup);//FLUSH
         }
+
+        ArrayList<Card> sortedCardsCopy = new ArrayList<>(sortedCards);
+        Power repeatedPower = getRepeatPowerAndFilterCards(4, sortedCardsCopy);
+        if (repeatedPower != null) {//FOUR
+            return getFourPower(repeatedPower, sortedCardsCopy);
+        }
+
+        Power repeatedPower3 = getRepeatPowerAndFilterCards(3, sortedCardsCopy);
+        if (repeatedPower3 != null) {
+            Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCardsCopy);
+            if (repeatedPower2 != null) {//FULL_HOUSE
+                return getFullHousePower(repeatedPower3, repeatedPower2);
+            }
+        }
+
+        if (suitGroup != null) {
+            return getFlushPower(suitGroup);//FLUSH
+        }
+
         BigDecimal straightPower = getStraightPower(sortedCards);
         if (straightPower != NONE_POWER) {//STRAIGHT
             return straightPower;
         }
-        ArrayList<Card> sortedCardsCopy = new ArrayList<>(sortedCards);
-        Power repeatedPower3 = getRepeatPowerAndFilterCards(3, sortedCardsCopy);
+
         if (repeatedPower3 != null) {//THREE
             return getThreePower(repeatedPower3, sortedCardsCopy);
         } else {
