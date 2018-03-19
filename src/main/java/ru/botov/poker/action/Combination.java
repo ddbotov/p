@@ -232,6 +232,51 @@ public class Combination {
 
     private static Power getRepeatPowerAndFilterCards(int repeatCardCount, List<Card> sortedCards) {
         Card lastCard = sortedCards.get(0);
+        EnumSet<Card> cardsToFilter = null;
+        for (int index=1; index<sortedCards.size(); index++) {
+            Card card = sortedCards.get(index);
+            if (lastCard.getPower().ordinal() == card.getPower().ordinal()) {
+                if (cardsToFilter == null) {
+                    cardsToFilter = EnumSet.of(card);
+                }
+                cardsToFilter.add(card);
+                if (cardsToFilter.size() == repeatCardCount) {
+                    sortedCards.removeAll(cardsToFilter);
+                    return lastCard.getPower();
+                }
+            } else {
+                cardsToFilter = null;
+                lastCard = card;
+            }
+        }
+        return null;
+
+
+/*        Iterator<Card> it = sortedCards.iterator();
+        Card lastCard = it.next();
+        //EnumSet<Card> cardsToFilter = EnumSet.of(lastCard);
+        int count = 0;
+        Power result = null;
+        while (it.hasNext()) {
+            Card card = it.next();
+            if (lastCard.getPower().ordinal() == card.getPower().ordinal()) {
+                //cardsToFilter.add(card);
+                count++;
+                if (count == repeatCardCount) {
+                    result = lastCard.getPower();
+                    break;
+                }
+            } else {
+                //cardsToFilter = EnumSet.of(card);
+                count = 0;
+                lastCard = card;
+            }
+        }
+
+        //sortedCards.removeAll(cardsToFilter);
+        return result;*/
+
+/*        Card lastCard = sortedCards.get(0);
         EnumSet<Card> cardsToFilter = EnumSet.of(lastCard);
         for (int index=1; index<sortedCards.size(); index++) {
             Card card = sortedCards.get(index);
@@ -246,7 +291,7 @@ public class Combination {
                 lastCard = card;
             }
         }
-        return null;
+        return null;*/
     }
 
     private static BigDecimal getTopPower(int topCardsCount, List<Card> sortedCards) {
