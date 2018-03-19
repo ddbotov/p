@@ -1,12 +1,14 @@
 package ru.botov.poker.action;
 
-import com.google.common.collect.Ordering;
 import ru.botov.poker.model.Card;
 import ru.botov.poker.model.Power;
 import ru.botov.poker.model.Suit;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.List;
 import java.util.function.Function;
 
 public class Combination {
@@ -250,22 +252,6 @@ public class Combination {
         return power;
     }
 
-/*    private static Comparator<? super Card> sortedDescComparator = new Comparator<Card>() {
-        @Override
-        public int compare(Card o1, Card o2) {
-            return o2.getPower().ordinal() - o1.getPower().ordinal();
-        }
-    };*/
-
-    private static Comparator<Object> sortedDescComparator = new Comparator<Object>() {
-        @Override
-        public int compare(Object o1, Object o2) {
-            return ((Card) o2).getPower().ordinal() - ((Card) o1).getPower().ordinal();
-        }
-    };
-
-    private static Ordering ordering = Ordering.from(sortedDescComparator);
-
     //Возвращает отсортированнй по убыванию список
     private static List<Card> getSortedDescCards(EnumSet<Card> cards) {
         Object[] elementData = cards.toArray();
@@ -275,19 +261,15 @@ public class Combination {
     }
 
     public static void bubbleSort(Object[] numArray) {
-
         int n = numArray.length;
         Object temp = 0;
-
         for (int i = 0; i < n; i++) {
             for (int j = 1; j < (n - i); j++) {
-
                 if (((Card) numArray[j - 1]).getPower().ordinal() > ( (Card) numArray[j]).getPower().ordinal()) {
                     temp = numArray[j - 1];
                     numArray[j - 1] = numArray[j];
                     numArray[j] = temp;
                 }
-
             }
         }
     }
