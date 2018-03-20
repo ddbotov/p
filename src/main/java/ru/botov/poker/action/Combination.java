@@ -7,7 +7,6 @@ import ru.botov.poker.model.Suit;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.function.Function;
 
 public class Combination {
 
@@ -81,11 +80,12 @@ public class Combination {
                 }
                 nextStepWins = true;
             case 4:
-                BigDecimal straightPower = getStraightPower(sortedCards);
-                if (straightPower != NONE_POWER) {//STRAIGHT
+                Card straightCard = getStraightCard(sortedCards);
+                if (straightCard != null) {//STRAIGHT
                     if (nextStepWins) {
                         return true;
                     }
+                    BigDecimal straightPower = straightPowerFrom(straightCard);
                     if (straightPower.compareTo(myPower) > 0) {
                         return true;
                     }
@@ -154,11 +154,12 @@ public class Combination {
                     suitGroup = getFlushGroup(sortedCards);
                 }
                 if (!suitGroup.isEmpty()) {
-                    straightPower = getStraightPower(suitGroup);
-                    if (straightPower != NONE_POWER) {//STRAIGHT_FLUSH
+                    straightCard = getStraightCard(suitGroup);
+                    if (straightCard != null) {//STRAIGHT_FLUSH
                         if (nextStepWins) {
                             return true;
                         }
+                        BigDecimal straightPower = straightPowerFrom(straightCard);
                         result = getStraightFlushPower(straightPower);
                         if (result.compareTo(myPower) > 0) {
                             return true;
@@ -174,8 +175,9 @@ public class Combination {
 
         List<Card> suitGroup = getFlushGroup(sortedCards);
         if (!suitGroup.isEmpty()) {
-            BigDecimal straightPower = getStraightPower(suitGroup);
-            if (straightPower != NONE_POWER) {//STRAIGHT_FLUSH
+            Card straightCard = getStraightCard(suitGroup);
+            if (straightCard != null) {//STRAIGHT_FLUSH
+                BigDecimal straightPower = straightPowerFrom(straightCard);
                 return new StepPower(getStraightFlushPower(straightPower), 8);
             }
         }
@@ -198,8 +200,9 @@ public class Combination {
             return new StepPower(getFlushPower(suitGroup), 5);//FLUSH
         }
 
-        BigDecimal straightPower = getStraightPower(sortedCards);
-        if (straightPower != NONE_POWER) {//STRAIGHT
+        Card straightCard = getStraightCard(sortedCards);
+        if (straightCard != null) {//STRAIGHT
+            BigDecimal straightPower = straightPowerFrom(straightCard);
             return new StepPower(straightPower, 4);
         }
 
@@ -248,26 +251,26 @@ public class Combination {
         return result;
     }
 
-    private static BigDecimal getStraightPower(List<Card> sortedCards) {
+    private static Card getStraightCard(List<Card> sortedCards) {
         Card straightTopCard = sortedCards.get(0);
         int straightLenght = 0;
         for (int index=1; index<sortedCards.size(); index++) {
             Card card = sortedCards.get(index);
             if (straightTopCard.getPower().ordinal()-card.getPower().ordinal() == ++straightLenght) {
                 if (straightLenght == 5) {
-                    return straightPowerFrom(straightTopCard);
+                    return straightTopCard;
                 }
                 if (straightTopCard.getPower() == Power.FIVE
                         && straightLenght == 4
                         && sortedCards.get(0).getPower() == Power.ACE) {
-                    return straightPowerFrom(straightTopCard);
+                    return straightTopCard;
                 }
             } else {
                 straightTopCard = card;
                 straightLenght=0;
             }
         }
-        return NONE_POWER;
+        return null;
     }
 
     private static BigDecimal fullHousePowerMultiplyer = new BigDecimal(1)
