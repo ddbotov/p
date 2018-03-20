@@ -21,9 +21,11 @@ public class Analizer {
     }
 
     private BigDecimal chanceForHandOnRiver = chanceForHand(Stage.RIVER.getRemainingSizeOfDeck());
-    private BigDecimal threeMoreCardChanceOnPreFlop = getRemaningCardChance(Stage.PREFLOP.getRemainingSizeOfDeck())
+    private BigDecimal fiveMoreCardChanceOnPreFlop = getRemaningCardChance(Stage.PREFLOP.getRemainingSizeOfDeck())
             .multiply(getRemaningCardChance(Stage.PREFLOP.getRemainingSizeOfDeck()-1))
-            .multiply(getRemaningCardChance(Stage.PREFLOP.getRemainingSizeOfDeck()-2));
+            .multiply(getRemaningCardChance(Stage.PREFLOP.getRemainingSizeOfDeck()-2))
+            .multiply(getRemaningCardChance(Stage.PREFLOP.getRemainingSizeOfDeck()-3))
+            .multiply(getRemaningCardChance(Stage.PREFLOP.getRemainingSizeOfDeck()-4));
     private BigDecimal oneMoreCardChanceOnFlop = getRemaningCardChance(Stage.FLOP.getRemainingSizeOfDeck());
     private BigDecimal oneMoreCardChanceOnTurn = getRemaningCardChance(Stage.TURN.getRemainingSizeOfDeck());
 
@@ -44,8 +46,14 @@ public class Analizer {
                         Card card2 = remainingCards.get(index2);
                         for (int index3 = index2 + 1; index3 < remainingCards.size(); index3++) {
                             Card card3 = remainingCards.get(index3);
-                            EnumSet<Card> potentialTableCards = EnumSet.of(card1, card2, card3);
-                            chanceToLose = chanceToLose.add(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame).multiply(threeMoreCardChanceOnPreFlop));
+                            for (int index4 = index3 + 1; index4 < remainingCards.size(); index4++) {
+                                Card card4 = remainingCards.get(index4);
+                                for (int index5 = index4 + 1; index5 < remainingCards.size(); index5++) {
+                                    Card card5 = remainingCards.get(index5);
+                                    EnumSet<Card> potentialTableCards = EnumSet.of(card1, card2, card3, card4, card5);
+                                    chanceToLose = chanceToLose.add(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame).multiply(fiveMoreCardChanceOnPreFlop));
+                                }
+                            }
                         }
                     }
                 }
