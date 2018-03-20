@@ -10,7 +10,7 @@ import java.util.function.Function;
 
 public class Combination {
 
-    private static final BigDecimal COMBINATION_POWER_STEP = new BigDecimal(1_000_000L);
+    private static final BigDecimal COMBINATION_POWER_STEP = new BigDecimal(1_000_000_000_000L);
     private static final BigDecimal NONE_POWER = new BigDecimal(0);
     private static final BigDecimal TOP_POWER_STEP = new BigDecimal(100);
 
