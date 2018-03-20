@@ -2,6 +2,7 @@ package ru.botov.poker.action;
 
 import ru.botov.poker.model.Card;
 import ru.botov.poker.model.Power;
+import ru.botov.poker.model.StepPower;
 import ru.botov.poker.model.Suit;
 
 import java.math.BigDecimal;
@@ -10,64 +11,151 @@ import java.util.function.Function;
 
 public class Combination {
 
-    private static final BigDecimal COMBINATION_POWER_STEP = new BigDecimal(1_000_000_000_000L);
+    public static final BigDecimal COMBINATION_POWER_STEP = new BigDecimal(1_000_000_000_000L);
     private static final BigDecimal NONE_POWER = new BigDecimal(0);
     private static final BigDecimal TOP_POWER_STEP = new BigDecimal(100);
 
-    public static BigDecimal getPower(EnumSet<Card> cards) {
-        if (cards == null) {
-            return NONE_POWER;
+    public static boolean isBetterHand(EnumSet<Card> cards, StepPower myStepPower) {
+        List<Card> sortedCards = getSortedDescCards(cards);
+        BigDecimal result = null;
+        List<Card> suitGroup = null;
+        BigDecimal myPower = myStepPower.getPower();
+        switch (myStepPower.getStepPower()) {
+            case 0:
+                result = getTopPower(5, sortedCards);//TOP
+                if (result.compareTo(myPower) > 0) {
+                    return true;
+                }
+            case 1:
+            case 2:
+                ArrayList<Card> sortedCardsCopy = new ArrayList<>(sortedCards);
+                Power repeatedPower1 = getRepeatPowerAndFilterCards(2, sortedCardsCopy);
+                if (repeatedPower1 != null) {//TWO
+                    result = repeatedPower1.getOrdinalBigDecimal();
+                    result = result.multiply(COMBINATION_POWER_STEP);
+                    result = result.add(getTopPower(3, sortedCardsCopy));
+                    if (result.compareTo(myPower) > 0) {
+                        return true;
+                    }
+                    Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCardsCopy);
+                    if (repeatedPower2 != null) {//TWO_PAIRS
+                        result = getTwoPairPower(repeatedPower1, repeatedPower2, sortedCardsCopy);
+                        if (result.compareTo(myPower) > 0) {
+                            return true;
+                        }
+                    }
+                }
+            case 3:
+                ArrayList<Card> sortedCardsCopy2 = new ArrayList<>(sortedCards);
+                Power repeatedPower3 = getRepeatPowerAndFilterCards(3, sortedCardsCopy2);
+                if (repeatedPower3 != null) {//THREE
+                    result = getThreePower(repeatedPower3, sortedCardsCopy2);
+                    if (result.compareTo(myPower) > 0) {
+                        return true;
+                    }
+                }
+            case 4:
+                BigDecimal straightPower = getStraightPower(sortedCards);
+                if (straightPower != NONE_POWER) {//STRAIGHT
+                    if (straightPower.compareTo(myPower) > 0) {
+                        return true;
+                    }
+                }
+            case 5:
+                suitGroup = getFlushGroup(sortedCards);
+                if (suitGroup != null) {//FLUSH
+                    result = getFlushPower(suitGroup);
+                    if (result.compareTo(myPower) > 0) {
+                        return true;
+                    }
+                }
+            case 6:
+                ArrayList<Card> sortedCardsCopy2_2 = new ArrayList<>(sortedCards);
+                Power repeatedPower3_2 = getRepeatPowerAndFilterCards(3, sortedCardsCopy2_2);
+                if (repeatedPower3_2 != null) {
+                    Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCardsCopy2_2);
+                    if (repeatedPower2 != null) {//FULL_HOUSE
+                        result = getFullHousePower(repeatedPower3_2, repeatedPower2);
+                        if (result.compareTo(myPower) > 0) {
+                            return true;
+                        }
+                    }
+                }
+            case 7:
+                ArrayList<Card> sortedCardsCopy3 = new ArrayList<>(sortedCards);
+                Power repeatedPower = getRepeatPowerAndFilterCards(4, sortedCardsCopy3);
+                if (repeatedPower != null) {//FOUR
+                    result = getFourPower(repeatedPower, sortedCardsCopy3);
+                    if (result.compareTo(myPower) > 0) {
+                        return true;
+                    }
+                }
+            case 8:
+                suitGroup = getFlushGroup(sortedCards);
+                if (suitGroup != null) {
+                    straightPower = getStraightPower(suitGroup);
+                    if (straightPower != NONE_POWER) {//STRAIGHT_FLUSH
+                        result = getStraightFlushPower(straightPower);
+                        if (result.compareTo(myPower) > 0) {
+                            return true;
+                        }
+                    }
+                }
         }
+        return false;
+    }
+
+    public static StepPower getPower(EnumSet<Card> cards) {
         List<Card> sortedCards = getSortedDescCards(cards);
 
         List<Card> suitGroup = getFlushGroup(sortedCards);
         if (suitGroup != null) {
             BigDecimal straightPower = getStraightPower(suitGroup);
             if (straightPower != NONE_POWER) {//STRAIGHT_FLUSH
-                return getStraightFlushPower(straightPower);
+                return new StepPower(getStraightFlushPower(straightPower), 8);
             }
         }
 
         ArrayList<Card> sortedCardsCopy = new ArrayList<>(sortedCards);
         Power repeatedPower = getRepeatPowerAndFilterCards(4, sortedCardsCopy);
         if (repeatedPower != null) {//FOUR
-            return getFourPower(repeatedPower, sortedCardsCopy);
+            return new StepPower(getFourPower(repeatedPower, sortedCardsCopy), 7);
         }
 
         Power repeatedPower3 = getRepeatPowerAndFilterCards(3, sortedCardsCopy);
         if (repeatedPower3 != null) {
             Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCardsCopy);
             if (repeatedPower2 != null) {//FULL_HOUSE
-                return getFullHousePower(repeatedPower3, repeatedPower2);
+                return new StepPower(getFullHousePower(repeatedPower3, repeatedPower2), 6);
             }
         }
 
         if (suitGroup != null) {
-            return getFlushPower(suitGroup);//FLUSH
+            return new StepPower(getFlushPower(suitGroup), 5);//FLUSH
         }
 
         BigDecimal straightPower = getStraightPower(sortedCards);
         if (straightPower != NONE_POWER) {//STRAIGHT
-            return straightPower;
+            return new StepPower(straightPower, 4);
         }
 
         if (repeatedPower3 != null) {//THREE
-            return getThreePower(repeatedPower3, sortedCardsCopy);
+            return new StepPower(getThreePower(repeatedPower3, sortedCardsCopy), 3);
         } else {
             Power repeatedPower1 = getRepeatPowerAndFilterCards(2, sortedCardsCopy);
             if (repeatedPower1 != null) {
                 Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCardsCopy);
                 if (repeatedPower2 != null) {//TWO_PAIRS
-                    return getTwoPairPower(repeatedPower1, repeatedPower2, sortedCardsCopy);
+                    return new StepPower(getTwoPairPower(repeatedPower1, repeatedPower2, sortedCardsCopy), 2);
                 } else {//TWO
                     BigDecimal result = repeatedPower1.getOrdinalBigDecimal();
                     result = result.multiply(COMBINATION_POWER_STEP);
                     result = result.add(getTopPower(3, sortedCardsCopy));
-                    return result;
+                    return new StepPower(result, 1);
                 }
             }
         }
-        return getTopPower(5, sortedCards);//TOP
+        return new StepPower(getTopPower(5, sortedCards), 0);//TOP
     }
 
     private static BigDecimal twoPairPowerMultiplyer = new BigDecimal(1)
@@ -270,8 +358,4 @@ public class Combination {
         }
     }
 
-    public static boolean isBetterHand(EnumSet<Card> potentialHand, BigDecimal myPower) {
-        BigDecimal handPower = Combination.getPower(potentialHand);
-        return handPower.compareTo(myPower) > 0;
-    }
 }
