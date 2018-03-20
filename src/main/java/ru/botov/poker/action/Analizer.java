@@ -1,53 +1,12 @@
 package ru.botov.poker.action;
 
-import ru.botov.poker.model.Card;
-import ru.botov.poker.model.Player;
-import ru.botov.poker.model.Stage;
-import ru.botov.poker.model.Table;
+import ru.botov.poker.model.*;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 
 public class Analizer {
-
-    public Set<Player> whoWins(Table table) {
-        EnumSet<Card> topHand = null;
-        Set<Player> topPlayers = new HashSet<>();
-        for (Player player : table.getPlayers()) {
-            EnumSet<Card> currentHand = EnumSet.copyOf(player.getCards());
-            currentHand.addAll(table.getCards());
-            BigDecimal currentPower = Combination.getPower(currentHand).subtract(Combination.getPower(topHand));
-            if (currentPower.compareTo(new BigDecimal(0)) > 0) {
-                topHand = currentHand;
-                topPlayers.clear();
-                topPlayers.add(player);
-            }
-            if (currentPower.compareTo(new BigDecimal(0)) == 0) {
-                topPlayers.add(player);
-            }
-        }
-
-        return topPlayers;
-    }
-
-    public long howMuchIWin(Table table) {
-        Set<Player> winners = whoWins(table);
-        boolean iAmWinner = false;
-        for (Player winner : winners) {
-            if (winner.isMe()) {
-                iAmWinner = true;
-            }
-        }
-        if (iAmWinner) {
-            return 0L;
-        }
-        return table.getBank() / winners.size();
-    }
-
-    public BigDecimal howMuchRise(Table table) {
-        return new BigDecimal(table.getBank()).multiply(getChanceToWin(table));
-    }
 
     public BigDecimal getChanceToWin(Table table) {
         this.cache = new HashMap<>();
@@ -138,7 +97,7 @@ public class Analizer {
             return valueFromCache;
         }
 
-        BigDecimal myPower = Combination.getPower(myAndTableCards);
+        StepPower myStepPower = Combination.getPower(myAndTableCards);
         ArrayList<Card> remainingCards = new ArrayList<>(ALL_CARDS);
         remainingCards.removeAll(myAndTableCards);
         long betterThanMeHandsCount = 0L;
@@ -149,7 +108,7 @@ public class Analizer {
                 EnumSet<Card> potentialHand = EnumSet.copyOf(tableCards);
                 potentialHand.add(card1);
                 potentialHand.add(card2);
-                if (Combination.isBetterHand(potentialHand, myPower)) {
+                if (Combination.isBetterHand(potentialHand, myStepPower)) {
                     betterThanMeHandsCount++;
                 }
             }
