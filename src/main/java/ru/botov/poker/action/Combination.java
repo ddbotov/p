@@ -243,7 +243,7 @@ public class Combination {
         for (int index=0; index < topCardsCount; index++) {
             Card card = sortedCards.get(index);
             BigDecimal cardValue = card.getPower().getOrdinalBigDecimal();
-            cardValue.multiply(bdCache[topCardsCount-index-1]);
+            cardValue = cardValue.multiply(bdCache[topCardsCount-index-1]);
             power = power.add(cardValue);
         }
         return power;
