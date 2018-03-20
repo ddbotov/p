@@ -61,7 +61,7 @@ public class Combination {
                 if (repeatedPower2 != null) {//TWO_PAIRS
                     return getTwoPairPower(repeatedPower1, repeatedPower2, sortedCardsCopy);
                 } else {//TWO
-                    BigDecimal result = new BigDecimal(repeatedPower1.ordinal());
+                    BigDecimal result = repeatedPower1.getOrdinalBigDecimal();
                     result = result.multiply(COMBINATION_POWER_STEP);
                     result = result.add(getTopPower(3, sortedCardsCopy));
                     return result;
@@ -76,9 +76,9 @@ public class Combination {
             .multiply(COMBINATION_POWER_STEP);
 
     private static BigDecimal getTwoPairPower(Power repeatedPower1, Power repeatedPower2, ArrayList<Card> sortedCardsCopy) {
-        BigDecimal result = new BigDecimal(repeatedPower1.ordinal());
+        BigDecimal result = repeatedPower1.getOrdinalBigDecimal();
         result = result.multiply(twoPairPowerMultiplyer);
-        BigDecimal repeatedPower2Result = new BigDecimal(repeatedPower2.ordinal());
+        BigDecimal repeatedPower2Result = repeatedPower2.getOrdinalBigDecimal();
         repeatedPower2Result = repeatedPower2Result.multiply(COMBINATION_POWER_STEP);
         result = result.add(repeatedPower2Result);
         result = result.add(getTopPower(1, sortedCardsCopy));
@@ -91,7 +91,7 @@ public class Combination {
             .multiply(COMBINATION_POWER_STEP);
 
     private static BigDecimal getThreePower(Power repeatedPower3, ArrayList<Card> sortedCards) {
-        BigDecimal result = new BigDecimal(repeatedPower3.ordinal());
+        BigDecimal result = repeatedPower3.getOrdinalBigDecimal();
         result = result.multiply(threePowerMultiplyer);
         result = result.add(getTopPower(2, sortedCards));
         return result;
@@ -128,9 +128,9 @@ public class Combination {
             .multiply(COMBINATION_POWER_STEP);
 
     private static BigDecimal getFullHousePower(Power repeatedPower3, Power repeatedPower2) {
-        BigDecimal result = new BigDecimal(repeatedPower3.ordinal());
+        BigDecimal result = repeatedPower3.getOrdinalBigDecimal();
         result = result.multiply(fullHousePowerMultiplyer);
-        result = result.add(new BigDecimal(repeatedPower2.ordinal()));
+        result = result.add(repeatedPower2.getOrdinalBigDecimal());
         return result;
     }
 
@@ -144,7 +144,7 @@ public class Combination {
             .multiply(COMBINATION_POWER_STEP);
 
     private static BigDecimal getFourPower(Power repeatedPower, ArrayList<Card> sortedCardsCopy) {
-        BigDecimal result = new BigDecimal(repeatedPower.ordinal());
+        BigDecimal result = repeatedPower.getOrdinalBigDecimal();
         result = result.multiply(fourPowerMultiplyer);
         result = result.add(getTopPower(1, sortedCardsCopy));
         return result;
@@ -164,7 +164,7 @@ public class Combination {
             .multiply(COMBINATION_POWER_STEP);
 
     private static BigDecimal getFlushPower(List<Card> sortedSuitGroup) {
-        BigDecimal result = new BigDecimal(sortedSuitGroup.get(0).getPower().ordinal());
+        BigDecimal result = sortedSuitGroup.get(0).getPower().getOrdinalBigDecimal();
         result = result.multiply(flushPowerMultiplyer);
         return result;
     }
@@ -203,7 +203,7 @@ public class Combination {
             .multiply(COMBINATION_POWER_STEP);
 
     private static BigDecimal straightPowerFrom(Card straightTopCard) {
-        BigDecimal result = new BigDecimal(straightTopCard.getPower().ordinal());
+        BigDecimal result = straightTopCard.getPower().getOrdinalBigDecimal();
         result = result.multiply(straightPowerMultiplyer);
         return result;
     }
@@ -230,10 +230,10 @@ public class Combination {
     }
 
     private static BigDecimal getTopPower(int topCardsCount, List<Card> sortedCards) {
-        BigDecimal power = new BigDecimal(0);
+        BigDecimal power = NONE_POWER;
         for (int index=0; index < topCardsCount; index++) {
             Card card = sortedCards.get(index);
-            BigDecimal cardValue = new BigDecimal(card.getPower().ordinal());
+            BigDecimal cardValue = card.getPower().getOrdinalBigDecimal();
             for (int index2=0; index2<topCardsCount-index-1; index2++) {
                 cardValue = cardValue.multiply(TOP_POWER_STEP);
             }

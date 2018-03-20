@@ -1,5 +1,7 @@
 package ru.botov.poker.model;
 
+import java.math.BigDecimal;
+
 public enum Power {
 
     TWO,
@@ -14,6 +16,15 @@ public enum Power {
     JACK,
     QEEAN,
     KING,
-    ACE
+    ACE;
+
+    private BigDecimal ordinalBigDecimal;
+
+    public BigDecimal getOrdinalBigDecimal() {
+        if (this.ordinalBigDecimal == null) {
+            this.ordinalBigDecimal = new BigDecimal(ordinal());
+        }
+        return ordinalBigDecimal;
+    }
 
 }

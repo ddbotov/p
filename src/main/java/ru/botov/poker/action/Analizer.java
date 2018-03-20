@@ -68,8 +68,10 @@ public class Analizer {
     private BigDecimal oneMoreCardChanceOnFlop = getRemaningCardChance(Stage.FLOP.getRemainingSizeOfDeck());
     private BigDecimal oneMoreCardChanceOnTurn = getRemaningCardChance(Stage.TURN.getRemainingSizeOfDeck());
 
+    private static final BigDecimal ZERO = new BigDecimal(0);
+
     private BigDecimal getChanceToLose(EnumSet<Card> tableCards, EnumSet<Card> myCards, BigDecimal otherPlayersInGame) {
-        BigDecimal chanceToLose = new BigDecimal(0);
+        BigDecimal chanceToLose = ZERO;
         if (tableCards.size() == 5) {
             long betterThanMeHandsCount = betterThanMeHandsCount(tableCards, myCards);
             chanceToLose = chanceToLose.add(new BigDecimal(betterThanMeHandsCount).multiply(chanceForHandOnRiver).multiply(otherPlayersInGame));
