@@ -10,12 +10,11 @@ import java.util.function.Function;
 
 public class Combination {
 
-    private static final BigDecimal COMBINATION_POWER_STEP = new BigDecimal(1_000_000_000_000L);
+    private static final BigDecimal COMBINATION_POWER_STEP = new BigDecimal(1_000_000L);
     private static final BigDecimal NONE_POWER = new BigDecimal(0);
     private static final BigDecimal TOP_POWER_STEP = new BigDecimal(100);
 
     public static BigDecimal getPower(EnumSet<Card> cards) {
-        //return NONE_POWER;//TODO remove
         if (cards == null) {
             return NONE_POWER;
         }
@@ -75,7 +74,7 @@ public class Combination {
             .multiply(COMBINATION_POWER_STEP)
             .multiply(COMBINATION_POWER_STEP);
 
-    private static BigDecimal getTwoPairPower(Power repeatedPower1, Power repeatedPower2, ArrayList<Card> sortedCardsCopy) {
+    private static BigDecimal getTwoPairPower(Power repeatedPower1, Power repeatedPower2, List<Card> sortedCardsCopy) {
         BigDecimal result = repeatedPower1.getOrdinalBigDecimal();
         result = result.multiply(twoPairPowerMultiplyer);
         BigDecimal repeatedPower2Result = repeatedPower2.getOrdinalBigDecimal();
@@ -90,7 +89,7 @@ public class Combination {
             .multiply(COMBINATION_POWER_STEP)
             .multiply(COMBINATION_POWER_STEP);
 
-    private static BigDecimal getThreePower(Power repeatedPower3, ArrayList<Card> sortedCards) {
+    private static BigDecimal getThreePower(Power repeatedPower3, List<Card> sortedCards) {
         BigDecimal result = repeatedPower3.getOrdinalBigDecimal();
         result = result.multiply(threePowerMultiplyer);
         result = result.add(getTopPower(2, sortedCards));
@@ -143,7 +142,7 @@ public class Combination {
             .multiply(COMBINATION_POWER_STEP)
             .multiply(COMBINATION_POWER_STEP);
 
-    private static BigDecimal getFourPower(Power repeatedPower, ArrayList<Card> sortedCardsCopy) {
+    private static BigDecimal getFourPower(Power repeatedPower, List<Card> sortedCardsCopy) {
         BigDecimal result = repeatedPower.getOrdinalBigDecimal();
         result = result.multiply(fourPowerMultiplyer);
         result = result.add(getTopPower(1, sortedCardsCopy));
@@ -271,4 +270,8 @@ public class Combination {
         }
     }
 
+    public static boolean isBetterHand(EnumSet<Card> potentialHand, BigDecimal myPower) {
+        BigDecimal handPower = Combination.getPower(potentialHand);
+        return handPower.compareTo(myPower) > 0;
+    }
 }

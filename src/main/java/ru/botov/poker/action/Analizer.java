@@ -149,8 +149,7 @@ public class Analizer {
                 EnumSet<Card> potentialHand = EnumSet.copyOf(tableCards);
                 potentialHand.add(card1);
                 potentialHand.add(card2);
-                BigDecimal handPower = Combination.getPower(potentialHand);
-                if (handPower.compareTo(myPower) > 0) {
+                if (Combination.isBetterHand(potentialHand, myPower)) {
                     betterThanMeHandsCount++;
                 }
             }
