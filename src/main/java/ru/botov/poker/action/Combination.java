@@ -229,14 +229,21 @@ public class Combination {
         return null;
     }
 
+    private static BigDecimal[] bdCache = new BigDecimal[5];
+    static {
+        bdCache[0] = TOP_POWER_STEP.multiply(new BigDecimal(0));
+        bdCache[1] = TOP_POWER_STEP.multiply(new BigDecimal(1));
+        bdCache[2] = TOP_POWER_STEP.multiply(new BigDecimal(2));
+        bdCache[3] = TOP_POWER_STEP.multiply(new BigDecimal(3));
+        bdCache[4] = TOP_POWER_STEP.multiply(new BigDecimal(4));
+    }
+
     private static BigDecimal getTopPower(int topCardsCount, List<Card> sortedCards) {
         BigDecimal power = NONE_POWER;
         for (int index=0; index < topCardsCount; index++) {
             Card card = sortedCards.get(index);
             BigDecimal cardValue = card.getPower().getOrdinalBigDecimal();
-            for (int index2=0; index2<topCardsCount-index-1; index2++) {
-                cardValue = cardValue.multiply(TOP_POWER_STEP);
-            }
+            cardValue.multiply(bdCache[topCardsCount-index-1]);
             power = power.add(cardValue);
         }
         return power;
