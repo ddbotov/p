@@ -5,11 +5,11 @@ import java.math.BigDecimal;
 public class StepPower {
 
     private BigDecimal power;
-    private int stepPower;
+    private int step;
 
-    public StepPower(BigDecimal power, int stepPower) {
+    public StepPower(BigDecimal power, int step) {
         this.power = power;
-        this.stepPower = stepPower;
+        this.step = step;
     }
 
     public BigDecimal getPower() {
@@ -20,11 +20,11 @@ public class StepPower {
         this.power = power;
     }
 
-    public int getStepPower() {
-        return stepPower;
+    public int getStep() {
+        return step;
     }
 
-    public void setStepPower(int stepPower) {
-        this.stepPower = stepPower;
+    public void setStep(int step) {
+        this.step = step;
     }
 }

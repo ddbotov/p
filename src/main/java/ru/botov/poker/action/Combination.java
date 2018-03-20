@@ -14,7 +14,7 @@ public class Combination {
     private static final BigDecimal NONE_POWER = new BigDecimal(0);
     private static final BigDecimal TOP_POWER_STEP = new BigDecimal(100);
 
-    public static boolean isBetterHand(EnumSet<Card> cards, StepPower myStepPower) {
+    public static boolean isBetterHand(EnumSet<Card> cards, StepPower stepPower) {
         List<Card> sortedCards = getSortedDescCards(cards);
 
         BigDecimal result = null;
@@ -24,21 +24,20 @@ public class Combination {
 
         Power repeatedPower3 = null;
 
-        BigDecimal myPower = myStepPower.getPower();
-        boolean nextStepWins = false;
-        switch (myStepPower.getStepPower()) {
+        BigDecimal myPower = stepPower.getPower();
+        int myStep = stepPower.getStep();
+        switch (myStep) {
             case 0:
                 result = getTopPower(5, sortedCards);//TOP
                 if (result.compareTo(myPower) > 0) {
                     return true;
                 }
-                nextStepWins = true;
             case 1:
             case 2:
                 sortedCardsCopy = new ArrayList<>(sortedCards);
                 Power repeatedPower1 = getRepeatPowerAndFilterCards(2, sortedCardsCopy);
                 if (repeatedPower1 != null) {//TWO
-                    if (nextStepWins) {
+                    if (myStep == 0) {
                         return true;
                     }
                     result = repeatedPower1.getOrdinalBigDecimal();
@@ -49,7 +48,7 @@ public class Combination {
                     }
                     Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCardsCopy);
                     if (repeatedPower2 != null) {//TWO_PAIRS
-                        if (nextStepWins) {
+                        if (myStep == 1) {
                             return true;
                         }
                         result = getTwoPairPower(repeatedPower1, repeatedPower2, sortedCardsCopy);
@@ -58,7 +57,6 @@ public class Combination {
                         }
                     }
                 }
-                nextStepWins = true;
             case 3:
                 if (sortedCardsCopy != null) {
                     if (sortedCardsCopy.size()<7) {
@@ -70,7 +68,7 @@ public class Combination {
                     repeatedPower3 = getRepeatPowerAndFilterCards(3, sortedCardsCopy);
                 }
                 if (repeatedPower3 != null) {//THREE
-                    if (nextStepWins) {
+                    if (myStep == 2) {
                         return true;
                     }
                     result = getThreePower(repeatedPower3, sortedCardsCopy);
@@ -78,11 +76,10 @@ public class Combination {
                         return true;
                     }
                 }
-                nextStepWins = true;
             case 4:
                 Card straightCard = getStraightCard(sortedCards);
                 if (straightCard != null) {//STRAIGHT
-                    if (nextStepWins) {
+                    if (myStep == 3) {
                         return true;
                     }
                     BigDecimal straightPower = straightPowerFrom(straightCard);
@@ -90,11 +87,10 @@ public class Combination {
                         return true;
                     }
                 }
-                nextStepWins = true;
             case 5:
                 suitGroup = getFlushGroup(sortedCards);
                 if (!suitGroup.isEmpty()) {//FLUSH
-                    if (nextStepWins) {
+                    if (myStep == 4) {
                         return true;
                     }
                     result = getFlushPower(suitGroup);
@@ -102,7 +98,6 @@ public class Combination {
                         return true;
                     }
                 }
-                nextStepWins = true;
             case 6:
                 if (repeatedPower3 == null) {
                     if (sortedCardsCopy != null) {
@@ -118,7 +113,7 @@ public class Combination {
                 if (repeatedPower3 != null) {
                     Power repeatedPower2 = getRepeatPowerAndFilterCards(2, sortedCardsCopy);
                     if (repeatedPower2 != null) {//FULL_HOUSE
-                        if (nextStepWins) {
+                        if (myStep == 5) {
                             return true;
                         }
                         result = getFullHousePower(repeatedPower3, repeatedPower2);
@@ -127,7 +122,6 @@ public class Combination {
                         }
                     }
                 }
-                nextStepWins = true;
             case 7:
                 Power repeatedPower4 = null;
                 if (sortedCardsCopy != null) {
@@ -140,7 +134,7 @@ public class Combination {
                     repeatedPower4 = getRepeatPowerAndFilterCards(4, sortedCardsCopy);
                 }
                 if (repeatedPower4 != null) {//FOUR
-                    if (nextStepWins) {
+                    if (myStep == 6) {
                         return true;
                     }
                     result = getFourPower(repeatedPower4, sortedCardsCopy);
@@ -148,7 +142,6 @@ public class Combination {
                         return true;
                     }
                 }
-                nextStepWins = true;
             case 8:
                 if (suitGroup == null) {
                     suitGroup = getFlushGroup(sortedCards);
@@ -156,7 +149,7 @@ public class Combination {
                 if (!suitGroup.isEmpty()) {
                     straightCard = getStraightCard(suitGroup);
                     if (straightCard != null) {//STRAIGHT_FLUSH
-                        if (nextStepWins) {
+                        if (myStep == 7) {
                             return true;
                         }
                         BigDecimal straightPower = straightPowerFrom(straightCard);
