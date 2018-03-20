@@ -231,11 +231,11 @@ public class Combination {
 
     private static BigDecimal[] bdCache = new BigDecimal[5];
     static {
-        bdCache[0] = TOP_POWER_STEP.multiply(new BigDecimal(0));
-        bdCache[1] = TOP_POWER_STEP.multiply(new BigDecimal(1));
-        bdCache[2] = TOP_POWER_STEP.multiply(new BigDecimal(2));
-        bdCache[3] = TOP_POWER_STEP.multiply(new BigDecimal(3));
-        bdCache[4] = TOP_POWER_STEP.multiply(new BigDecimal(4));
+        bdCache[0] = TOP_POWER_STEP.pow(0);
+        bdCache[1] = TOP_POWER_STEP.pow(1);
+        bdCache[2] = TOP_POWER_STEP.pow(2);
+        bdCache[3] = TOP_POWER_STEP.pow(3);
+        bdCache[4] = TOP_POWER_STEP.pow(4);
     }
 
     private static BigDecimal getTopPower(int topCardsCount, List<Card> sortedCards) {
