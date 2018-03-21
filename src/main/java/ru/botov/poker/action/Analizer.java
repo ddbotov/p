@@ -110,7 +110,7 @@ public class Analizer {
         SortUtils.bubbleSort(tableCardsArr);//фильтруем заранее, чтобы в цилке фильтрация с рукой проходила быстрее
         boolean canHaveFlush = Combination.canHaveFlush(tableCards);
         boolean canHaveFourOrFullHouse = Combination.canHaveFourOrFullHouse(tableCardsArr);
-        //boolean canHaveStraight = Combination.canHaveStraight(tableCardsArr);
+       //TODO boolean canHaveStraight = Combination.canHaveStraight(tableCardsArr);
 
         StepPower myStepPower = Combination.getPower(myAndTableCards, canHaveFlush, canHaveFourOrFullHouse);
         ArrayList<Card> remainingCards = new ArrayList<>(ALL_CARDS);

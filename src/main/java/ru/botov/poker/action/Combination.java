@@ -445,4 +445,14 @@ public class Combination {
         }
         return false;
     }
+
+    public static boolean canHaveStraight(Card[] tableCards) {
+        for (int i=0; i<tableCards.length-1; i++) {
+            int diff = tableCards[i].getPower().ordinal()-tableCards[i+1].getPower().ordinal();
+            if (diff<2) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
