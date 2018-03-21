@@ -23,6 +23,7 @@ public class Combination {
         ArrayList<Card> sortedCardsCopy = null;
         List<Card> suitGroup = null;
 
+        Power repeatedPower1 = null;
         Power repeatedPower3 = null;
         Card straightCard = null;
         Power repeatedPower4 = null;
@@ -38,7 +39,7 @@ public class Combination {
             case 1:
             case 2:
                 sortedCardsCopy = new ArrayList<>(sortedCards);
-                Power repeatedPower1 = getRepeatPowerAndFilterCards(2, sortedCardsCopy);
+                repeatedPower1 = getRepeatPowerAndFilterCards(2, sortedCardsCopy);
                 if (repeatedPower1 != null) {//TWO
                     if (myStep == 0) {
                         return true;
@@ -61,22 +62,24 @@ public class Combination {
                     }
                 }
             case 3:
-                if (sortedCardsCopy != null) {
-                    if (sortedCardsCopy.size()<7) {
+                if (myStep > 2 || repeatedPower1 != null) {//при отсутствии пар не может быть троек
+                    if (sortedCardsCopy != null) {
+                        if (sortedCardsCopy.size()<7) {
+                            sortedCardsCopy = new ArrayList<>(sortedCards);
+                            repeatedPower3 = getRepeatPowerAndFilterCards(3, sortedCardsCopy);
+                        }
+                    } else {
                         sortedCardsCopy = new ArrayList<>(sortedCards);
                         repeatedPower3 = getRepeatPowerAndFilterCards(3, sortedCardsCopy);
                     }
-                } else {
-                    sortedCardsCopy = new ArrayList<>(sortedCards);
-                    repeatedPower3 = getRepeatPowerAndFilterCards(3, sortedCardsCopy);
-                }
-                if (repeatedPower3 != null) {//THREE
-                    if (myStep == 2) {
-                        return true;
-                    }
-                    result = getThreePower(repeatedPower3, sortedCardsCopy);
-                    if (result.compareTo(myPower) > 0) {
-                        return true;
+                    if (repeatedPower3 != null) {//THREE
+                        if (myStep == 2) {
+                            return true;
+                        }
+                        result = getThreePower(repeatedPower3, sortedCardsCopy);
+                        if (result.compareTo(myPower) > 0) {
+                            return true;
+                        }
                     }
                 }
             case 4:
