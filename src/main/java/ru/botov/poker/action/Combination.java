@@ -23,6 +23,8 @@ public class Combination {
         List<Card> suitGroup = null;
 
         Power repeatedPower3 = null;
+        Card straightCard = null;
+        Power repeatedPower4 = null;
 
         BigDecimal myPower = stepPower.getPower();
         int myStep = stepPower.getStep();
@@ -77,7 +79,7 @@ public class Combination {
                     }
                 }
             case 4:
-                Card straightCard = getStraightCard(sortedCards);
+                straightCard = getStraightCard(sortedCards);
                 if (straightCard != null) {//STRAIGHT
                     if (myStep == 3) {
                         return true;
@@ -89,7 +91,7 @@ public class Combination {
                 }
             case 5:
                 suitGroup = getFlushGroup(sortedCards);
-                if (!suitGroup.isEmpty()) {//FLUSH
+                if (suitGroup != null) {//FLUSH
                     if (myStep == 4) {
                         return true;
                     }
@@ -123,39 +125,42 @@ public class Combination {
                     }
                 }
             case 7:
-                Power repeatedPower4 = null;
-                if (sortedCardsCopy != null) {
-                    if (sortedCardsCopy.size()<7) {
+                if (straightCard != null || suitGroup != null) {//в случае стрита или флеша каре быть не может
+                    if (sortedCardsCopy != null) {
+                        if (sortedCardsCopy.size()<7) {
+                            sortedCardsCopy = new ArrayList<>(sortedCards);
+                            repeatedPower4 = getRepeatPowerAndFilterCards(4, sortedCardsCopy);
+                        }
+                    } else {
                         sortedCardsCopy = new ArrayList<>(sortedCards);
                         repeatedPower4 = getRepeatPowerAndFilterCards(4, sortedCardsCopy);
                     }
-                } else {
-                    sortedCardsCopy = new ArrayList<>(sortedCards);
-                    repeatedPower4 = getRepeatPowerAndFilterCards(4, sortedCardsCopy);
-                }
-                if (repeatedPower4 != null) {//FOUR
-                    if (myStep == 6) {
-                        return true;
-                    }
-                    result = getFourPower(repeatedPower4, sortedCardsCopy);
-                    if (result.compareTo(myPower) > 0) {
-                        return true;
+                    if (repeatedPower4 != null) {//FOUR
+                        if (myStep == 6) {
+                            return true;
+                        }
+                        result = getFourPower(repeatedPower4, sortedCardsCopy);
+                        if (result.compareTo(myPower) > 0) {
+                            return true;
+                        }
                     }
                 }
             case 8:
-                if (suitGroup == null) {
-                    suitGroup = getFlushGroup(sortedCards);
-                }
-                if (!suitGroup.isEmpty()) {
-                    straightCard = getStraightCard(suitGroup);
-                    if (straightCard != null) {//STRAIGHT_FLUSH
-                        if (myStep == 7) {
-                            return true;
-                        }
-                        BigDecimal straightPower = straightPowerFrom(straightCard);
-                        result = getStraightFlushPower(straightPower);
-                        if (result.compareTo(myPower) > 0) {
-                            return true;
+                if (repeatedPower4 != null) {//в случае каре стритфлеша быть не может
+                    if (myStep > 4) {
+                        suitGroup = getFlushGroup(sortedCards);
+                    }
+                    if (suitGroup != null) {
+                        straightCard = getStraightCard(suitGroup);
+                        if (straightCard != null) {//STRAIGHT_FLUSH
+                            if (myStep == 7) {
+                                return true;
+                            }
+                            BigDecimal straightPower = straightPowerFrom(straightCard);
+                            result = getStraightFlushPower(straightPower);
+                            if (result.compareTo(myPower) > 0) {
+                                return true;
+                            }
                         }
                     }
                 }
@@ -167,7 +172,7 @@ public class Combination {
         List<Card> sortedCards = getSortedDescCards(cards);
 
         List<Card> suitGroup = getFlushGroup(sortedCards);
-        if (!suitGroup.isEmpty()) {
+        if (suitGroup != null) {
             Card straightCard = getStraightCard(suitGroup);
             if (straightCard != null) {//STRAIGHT_FLUSH
                 BigDecimal straightPower = straightPowerFrom(straightCard);
@@ -189,7 +194,7 @@ public class Combination {
             }
         }
 
-        if (!suitGroup.isEmpty()) {
+        if (suitGroup != null) {
             return new StepPower(getFlushPower(suitGroup), 5);//FLUSH
         }
 
@@ -340,7 +345,7 @@ public class Combination {
                 }
             }
         }
-        return Collections.EMPTY_LIST;
+        return null;
     }
 
     private static BigDecimal straightPowerMultiplyer = new BigDecimal(1)
