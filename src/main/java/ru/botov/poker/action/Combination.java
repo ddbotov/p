@@ -4,6 +4,7 @@ import ru.botov.poker.model.Card;
 import ru.botov.poker.model.Power;
 import ru.botov.poker.model.StepPower;
 import ru.botov.poker.model.Suit;
+import ru.botov.poker.utils.SortUtils;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -14,8 +15,7 @@ public class Combination {
     private static final BigDecimal NONE_POWER = new BigDecimal(0);
     private static final BigDecimal TOP_POWER_STEP = new BigDecimal(100);
 
-    public static boolean isBetterHand(EnumSet<Card> cards, StepPower stepPower) {
-        List<Card> sortedCards = getSortedDescCards(cards);
+    public static boolean isBetterHand(List<Card> sortedCards, StepPower stepPower) {
 
         BigDecimal result = null;
 
@@ -169,7 +169,7 @@ public class Combination {
     }
 
     public static StepPower getPower(EnumSet<Card> cards) {
-        List<Card> sortedCards = getSortedDescCards(cards);
+        List<Card> sortedCards = SortUtils.getSortedDescCards(cards);
 
         List<Card> suitGroup = getFlushGroup(sortedCards);
         if (suitGroup != null) {
@@ -399,28 +399,6 @@ public class Combination {
             power = power.add(cardValue);
         }
         return power;
-    }
-
-    //Возвращает отсортированнй по убыванию список
-    private static List<Card> getSortedDescCards(EnumSet<Card> cards) {
-        Object[] elementData = cards.toArray();
-        bubbleSort(elementData);
-        List<Object> sortedCards = Arrays.asList(elementData);
-        return (List<Card>) (List) sortedCards;
-    }
-
-    public static void bubbleSort(Object[] numArray) {
-        int n = numArray.length;
-        Object temp = 0;
-        for (int i = 0; i < n; i++) {
-            for (int j = 1; j < (n - i); j++) {
-                if (((Card) numArray[j - 1]).getPower().ordinal() > ( (Card) numArray[j]).getPower().ordinal()) {
-                    temp = numArray[j - 1];
-                    numArray[j - 1] = numArray[j];
-                    numArray[j] = temp;
-                }
-            }
-        }
     }
 
 }

@@ -1,6 +1,7 @@
 package ru.botov.poker.action;
 
 import ru.botov.poker.model.*;
+import ru.botov.poker.utils.SortUtils;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -104,6 +105,8 @@ public class Analizer {
         if (valueFromCache != null) {
             return valueFromCache;
         }
+        Card[] tableCardsArr = new Card[5];
+        tableCards.toArray(tableCardsArr);
 
         StepPower myStepPower = Combination.getPower(myAndTableCards);
         ArrayList<Card> remainingCards = new ArrayList<>(ALL_CARDS);
@@ -113,10 +116,20 @@ public class Analizer {
             Card card1 = remainingCards.get(index1);
             for (int index2=index1+1; index2<remainingCards.size(); index2++) {
                 Card card2 = remainingCards.get(index2);
-                EnumSet<Card> potentialHand = EnumSet.copyOf(tableCards);
-                potentialHand.add(card1);
-                potentialHand.add(card2);
-                if (Combination.isBetterHand(potentialHand, myStepPower)) {
+
+                Card[] handArr = new Card[7];
+                handArr[0] = tableCardsArr[0];
+                handArr[1] = tableCardsArr[1];
+                handArr[2] = tableCardsArr[2];
+                handArr[3] = tableCardsArr[3];
+                handArr[4] = tableCardsArr[4];
+                //Card[] handArr = Arrays.copyOf(tableCardsArr, 7);
+                handArr[5] = card1;
+                handArr[6] = card2;
+                SortUtils.bubbleSort(handArr);
+                List<Card> sortedCards = Arrays.asList(handArr);
+
+                if (Combination.isBetterHand(sortedCards, myStepPower)) {
                     betterThanMeHandsCount++;
                 }
             }
