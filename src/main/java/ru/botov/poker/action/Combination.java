@@ -101,7 +101,7 @@ public class Combination {
                     }
                 }
             case 6:
-                if (repeatedPower3 == null) {
+                if (myStep > 3) {
                     if (sortedCardsCopy != null) {
                         if (sortedCardsCopy.size()<7) {
                             sortedCardsCopy = new ArrayList<>(sortedCards);
