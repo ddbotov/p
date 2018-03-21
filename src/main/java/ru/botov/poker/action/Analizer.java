@@ -107,6 +107,7 @@ public class Analizer {
         }
         Card[] tableCardsArr = new Card[5];
         tableCards.toArray(tableCardsArr);
+        SortUtils.bubbleSort(tableCardsArr);//фильтруем заранее, чтобы в цилке фильтрация с рукой проходила быстрее
 
         StepPower myStepPower = Combination.getPower(myAndTableCards);
         ArrayList<Card> remainingCards = new ArrayList<>(ALL_CARDS);

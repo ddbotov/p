@@ -18,7 +18,7 @@ public class SortUtils {
 
     public static void bubbleSort(Object[] numArray) {
         int n = numArray.length;
-        Object temp = 0;
+        Object temp;
         for (int i = 0; i < n; i++) {
             for (int j = 1; j < (n - i); j++) {
                 if (((Card) numArray[j - 1]).getPower().ordinal() > ( (Card) numArray[j]).getPower().ordinal()) {
