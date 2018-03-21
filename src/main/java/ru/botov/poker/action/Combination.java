@@ -125,7 +125,8 @@ public class Combination {
                     }
                 }
             case 7:
-                if (straightCard != null || suitGroup != null) {//в случае стрита или флеша каре быть не может
+                if (straightCard == null && suitGroup == null //в случае стрита или флеша быть не может каре
+                       && ( myStep > 3 || repeatedPower3 != null )) {//если нет тройки, то и каре быть не может
                     if (sortedCardsCopy != null) {
                         if (sortedCardsCopy.size()<7) {
                             sortedCardsCopy = new ArrayList<>(sortedCards);
