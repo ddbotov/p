@@ -15,7 +15,7 @@ public class Combination {
     private static final BigDecimal NONE_POWER = new BigDecimal(0);
     private static final BigDecimal TOP_POWER_STEP = new BigDecimal(100);
 
-    public static boolean isBetterHand(List<Card> sortedCards, StepPower stepPower) {
+    public static boolean isBetterHand(List<Card> sortedCards, StepPower stepPower, boolean canHaveFlush) {
 
         BigDecimal result = null;
 
@@ -90,7 +90,7 @@ public class Combination {
                     }
                 }
             case 5:
-                suitGroup = getFlushGroup(sortedCards);
+                suitGroup = getFlushGroup(sortedCards, canHaveFlush);
                 if (suitGroup != null) {//FLUSH
                     if (myStep == 4) {
                         return true;
@@ -149,7 +149,7 @@ public class Combination {
             case 8:
                 if (repeatedPower4 != null) {//в случае каре стритфлеша быть не может
                     if (myStep > 4) {
-                        suitGroup = getFlushGroup(sortedCards);
+                        suitGroup = getFlushGroup(sortedCards, canHaveFlush);
                     }
                     if (suitGroup != null) {
                         straightCard = getStraightCard(suitGroup);
@@ -169,10 +169,10 @@ public class Combination {
         return false;
     }
 
-    public static StepPower getPower(EnumSet<Card> cards) {
+    public static StepPower getPower(EnumSet<Card> cards, boolean canHaveFlush) {
         List<Card> sortedCards = SortUtils.getSortedDescCards(cards);
 
-        List<Card> suitGroup = getFlushGroup(sortedCards);
+        List<Card> suitGroup = getFlushGroup(sortedCards, canHaveFlush);
         if (suitGroup != null) {
             Card straightCard = getStraightCard(suitGroup);
             if (straightCard != null) {//STRAIGHT_FLUSH
@@ -322,18 +322,46 @@ public class Combination {
         return result;
     }
 
+    private static List<Card> getFlushGroup(List<Card> sortedCards, boolean canHaveFlush) {
+        if (!canHaveFlush) {
+            return null;
+        }
+        return getFlushGroup(sortedCards);
+    }
+
+    public static boolean canHaveFlush(EnumSet<Card> tableCards) {
+        int heartGroupSize = 0, diamondGroupSize = 0, clubGroupSize = 0, spadeGroupSize = 0;
+        for (Card card : tableCards) {
+            Suit suit = card.getSuit();
+            int suitGroupSize;
+            if (suit == Suit.HEART) {
+                suitGroupSize = ++heartGroupSize;
+            } else if (suit == Suit.DIAMOND) {
+                suitGroupSize = ++diamondGroupSize;
+            } else if (suit == Suit.CLUB) {
+                suitGroupSize = ++clubGroupSize;
+            } else {
+                suitGroupSize = ++spadeGroupSize;
+            }
+            if (suitGroupSize == 3) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private static List<Card> getFlushGroup(List<Card> cards) {
         List<Card> heartGroup = null, diamondGroup = null, clubGroup = null, spadeGroup = null;
         for (Card card : cards) {
             Suit suit = card.getSuit();
-            List<Card> suitGroup = null;
+            List<Card> suitGroup;
             if (suit == Suit.HEART) {
                 suitGroup = heartGroup;
             } else if (suit == Suit.DIAMOND) {
                 suitGroup = diamondGroup;
             } else if (suit == Suit.CLUB) {
                 suitGroup = clubGroup;
-            } else if (suit == Suit.SPADE) {
+            } else {
                 suitGroup = spadeGroup;
             }
             if (suitGroup == null) {
@@ -341,7 +369,7 @@ public class Combination {
                 suitGroup.add(card);
             } else {
                 suitGroup.add(card);
-                if (suitGroup.size() >= 5) {
+                if (suitGroup.size() == 5) {
                     return suitGroup;
                 }
             }

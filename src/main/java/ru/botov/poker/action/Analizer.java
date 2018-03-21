@@ -108,8 +108,9 @@ public class Analizer {
         Card[] tableCardsArr = new Card[5];
         tableCards.toArray(tableCardsArr);
         SortUtils.bubbleSort(tableCardsArr);//фильтруем заранее, чтобы в цилке фильтрация с рукой проходила быстрее
+        boolean canHaveFlush = Combination.canHaveFlush(tableCards);
 
-        StepPower myStepPower = Combination.getPower(myAndTableCards);
+        StepPower myStepPower = Combination.getPower(myAndTableCards, canHaveFlush);
         ArrayList<Card> remainingCards = new ArrayList<>(ALL_CARDS);
         remainingCards.removeAll(myAndTableCards);
         long betterThanMeHandsCount = 0L;
@@ -130,7 +131,7 @@ public class Analizer {
                 SortUtils.bubbleSort(handArr);
                 List<Card> sortedCards = Arrays.asList(handArr);
 
-                if (Combination.isBetterHand(sortedCards, myStepPower)) {
+                if (Combination.isBetterHand(sortedCards, myStepPower, canHaveFlush)) {
                     betterThanMeHandsCount++;
                 }
             }
