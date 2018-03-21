@@ -15,7 +15,8 @@ public class Combination {
     private static final BigDecimal NONE_POWER = new BigDecimal(0);
     private static final BigDecimal TOP_POWER_STEP = new BigDecimal(100);
 
-    public static boolean isBetterHand(List<Card> sortedCards, StepPower stepPower, boolean canHaveFlush) {
+    public static boolean isBetterHand(List<Card> sortedCards, StepPower stepPower, boolean canHaveFlush,
+                                       boolean canHaveFour) {
 
         BigDecimal result = null;
 
@@ -126,7 +127,8 @@ public class Combination {
                 }
             case 7:
                 if (straightCard == null && suitGroup == null //в случае стрита или флеша быть не может каре
-                       && ( myStep > 3 || repeatedPower3 != null )) {//если нет тройки, то и каре быть не может
+                       && ( myStep > 3 || repeatedPower3 != null ) //если нет тройки, то и каре быть не может
+                       && canHaveFour) {
                     if (sortedCardsCopy != null) {
                         if (sortedCardsCopy.size()<7) {
                             sortedCardsCopy = new ArrayList<>(sortedCards);
@@ -169,7 +171,7 @@ public class Combination {
         return false;
     }
 
-    public static StepPower getPower(EnumSet<Card> cards, boolean canHaveFlush) {
+    public static StepPower getPower(EnumSet<Card> cards, boolean canHaveFlush, boolean canHaveFour) {
         List<Card> sortedCards = SortUtils.getSortedDescCards(cards);
 
         List<Card> suitGroup = getFlushGroup(sortedCards, canHaveFlush);
@@ -182,9 +184,11 @@ public class Combination {
         }
 
         ArrayList<Card> sortedCardsCopy = new ArrayList<>(sortedCards);
-        Power repeatedPower = getRepeatPowerAndFilterCards(4, sortedCardsCopy);
-        if (repeatedPower != null) {//FOUR
-            return new StepPower(getFourPower(repeatedPower, sortedCardsCopy), 7);
+        if (canHaveFour) {
+            Power repeatedPower = getRepeatPowerAndFilterCards(4, sortedCardsCopy);
+            if (repeatedPower != null) {//FOUR
+                return new StepPower(getFourPower(repeatedPower, sortedCardsCopy), 7);
+            }
         }
 
         Power repeatedPower3 = getRepeatPowerAndFilterCards(3, sortedCardsCopy);
@@ -430,4 +434,12 @@ public class Combination {
         return power;
     }
 
+    public static boolean canHaveFour(Card[] tableCards) {
+        for (int i=0; i<tableCards.length-1; i++) {
+            if (tableCards[i]==tableCards[i+1]) {
+                return true;
+            }
+        }
+        return false;
+    }
 }
