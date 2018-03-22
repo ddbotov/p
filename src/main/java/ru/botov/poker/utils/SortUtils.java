@@ -21,7 +21,7 @@ public class SortUtils {
         Object temp;
         for (int i = 0; i < n; i++) {
             for (int j = 1; j < (n - i); j++) {
-                if (((Card) numArray[j - 1]).getPower().ordinal() > ( (Card) numArray[j]).getPower().ordinal()) {
+                if (((Card) numArray[j - 1]).getPower().ordinal() < ( (Card) numArray[j]).getPower().ordinal()) {
                     temp = numArray[j - 1];
                     numArray[j - 1] = numArray[j];
                     numArray[j] = temp;

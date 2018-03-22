@@ -13,10 +13,14 @@ public class Analizer {
         this.cache = new HashMap<>();
         BigDecimal chanceToWin = new BigDecimal(1);
 
-        BigDecimal otherPlayersInGame = new BigDecimal(table.getPlayers().size() - 1);//if i am in game
+        int otherPlayersInGame = table.getPlayers().size() - 1;//if i am in game
         EnumSet<Card> myCards = getMyCards(table);
-
-        BigDecimal chanceToLose = getChanceToLose(table.getCards().isEmpty() ? EnumSet.noneOf(Card.class) : EnumSet.copyOf(table.getCards()), myCards, otherPlayersInGame);
+        if (table.getCards().size() == 0) {//preflop
+            return Preflop.getChanceToWin(myCards, otherPlayersInGame);
+        }
+        BigDecimal chanceToLose = getChanceToLose(table.getCards().isEmpty() ?
+                EnumSet.noneOf(Card.class) : EnumSet.copyOf(table.getCards()), myCards,
+                new BigDecimal(otherPlayersInGame));
         chanceToWin = chanceToWin.subtract(chanceToLose);
         return chanceToWin;
     }
@@ -38,37 +42,16 @@ public class Analizer {
             long betterThanMeHandsCount = betterThanMeHandsCount(tableCards, myCards);
             chanceToLose = chanceToLose.add(new BigDecimal(betterThanMeHandsCount).multiply(chanceForHandOnRiver).multiply(otherPlayersInGame));
         } else {
-            if (tableCards.size() == 0) {//preflop
-                ArrayList<Card> remainingCards = new ArrayList<>(ALL_CARDS);
-                remainingCards.removeAll(myCards);
-                for (int index1=0; index1<remainingCards.size()-1; index1++) {
-                    Card card1 = remainingCards.get(index1);
-                    for (int index2 = index1 + 1; index2 < remainingCards.size(); index2++) {
-                        Card card2 = remainingCards.get(index2);
-                        for (int index3 = index2 + 1; index3 < remainingCards.size(); index3++) {
-                            Card card3 = remainingCards.get(index3);
-                            for (int index4 = index3 + 1; index4 < remainingCards.size(); index4++) {
-                                Card card4 = remainingCards.get(index4);
-                                for (int index5 = index4 + 1; index5 < remainingCards.size(); index5++) {
-                                    Card card5 = remainingCards.get(index5);
-                                    EnumSet<Card> potentialTableCards = EnumSet.of(card1, card2, card3, card4, card5);
-                                    chanceToLose = chanceToLose.add(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame).multiply(fiveMoreCardChanceOnPreFlop));
-                                }
-                            }
-                        }
-                    }
-                }
-            } else {
-                EnumSet<Card> remainingCards = EnumSet.copyOf(ALL_CARDS);
-                remainingCards.removeAll(tableCards);
-                remainingCards.removeAll(myCards);
-                BigDecimal oneMoreCardChance = tableCards.size() == 3 ? oneMoreCardChanceOnFlop : oneMoreCardChanceOnTurn;
-                for (Card remainingCard : remainingCards) {
-                    EnumSet<Card> potentialTableCards = EnumSet.copyOf(tableCards);
-                    potentialTableCards.add(remainingCard);
-                    chanceToLose = chanceToLose.add(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame).multiply(oneMoreCardChance));
-                }
+            EnumSet<Card> remainingCards = EnumSet.copyOf(ALL_CARDS);
+            remainingCards.removeAll(tableCards);
+            remainingCards.removeAll(myCards);
+            BigDecimal oneMoreCardChance = tableCards.size() == 3 ? oneMoreCardChanceOnFlop : oneMoreCardChanceOnTurn;
+            for (Card remainingCard : remainingCards) {
+                EnumSet<Card> potentialTableCards = EnumSet.copyOf(tableCards);
+                potentialTableCards.add(remainingCard);
+                chanceToLose = chanceToLose.add(getChanceToLose(potentialTableCards, myCards, otherPlayersInGame).multiply(oneMoreCardChance));
             }
+
         }
         return chanceToLose;
     }

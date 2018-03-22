@@ -4,21 +4,26 @@ import java.math.BigDecimal;
 
 public enum Power {
 
-    TWO,
-    THREE,
-    FOUR,
-    FIVE,
-    SIX,
-    SEVEN,
-    EIGHT,
-    NINE,
-    TEN,
-    JACK,
-    QEEAN,
-    KING,
-    ACE;
+    TWO("2"),
+    THREE("3"),
+    FOUR("4"),
+    FIVE("5"),
+    SIX("6"),
+    SEVEN("7"),
+    EIGHT("8"),
+    NINE("9"),
+    TEN("T"),
+    JACK("J"),
+    QEEAN("Q"),
+    KING("K"),
+    ACE("A");
 
     private BigDecimal ordinalBigDecimal;
+    private String shortName;
+
+    Power(String shortName) {
+        this.shortName = shortName;
+    }
 
     public BigDecimal getOrdinalBigDecimal() {
         if (this.ordinalBigDecimal == null) {
@@ -27,4 +32,8 @@ public enum Power {
         return ordinalBigDecimal;
     }
 
+    @Override
+    public String toString() {
+        return this.shortName;
+    }
 }
